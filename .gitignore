@@ -62,6 +62,9 @@ crashlytics-build.properties
 # Vscode
 .vscode/
 
+# Unity
+.unitypackage
+
 # Externals directory
 [Aa]ssets/AWSIM/Externals/*
 ![Aa]ssets/AWSIM/Externals/.gitkeep
