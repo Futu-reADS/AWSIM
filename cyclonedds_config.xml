@@ -3,7 +3,7 @@
 https://raw.githubusercontent.com/eclipse-cyclonedds/cyclonedds/master/etc/cyclonedds.xsd">
     <Domain id="any">
         <Internal>
-            <MinimumSocketReceiveBufferSize>20MB</MinimumSocketReceiveBufferSize>
+            <SocketReceiveBufferSize min="20MB"/>
         </Internal>
     </Domain>
 </CycloneDDS>
