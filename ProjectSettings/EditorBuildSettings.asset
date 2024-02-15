@@ -5,7 +5,19 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/AWSIM/Scenes/Main/AutowareSimulation.unity
     guid: 9a19a6429a390f1428320cff9d4e1f10
+  - enabled: 0
+    path: Assets/AWSIM_okinawa_testbed.unity
+    guid: a68334f049c57f689a0644c204e78e24
+  - enabled: 0
+    path: Assets/AWSIM/Scenes/Main/AutowareSimulation okinawa_testbed_20240213.unity
+    guid: 71cbb5e3370fb1143bb25b16d1a0b9ee
+  - enabled: 0
+    path: Assets/AWSIM/Scenes/Main/AutowareSimulation_okinawa_testbed.unity
+    guid: 32663f74ef0a6f7dca7dff3267c5111d
+  - enabled: 1
+    path: Assets/AWSIM/Scenes/Main/AutowareSimulation_okinawa_testbed.unity
+    guid: 56edb4c0e7281c3b1a84ee736734d1a3
   m_configObjects: {}
