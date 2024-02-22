@@ -2,10 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 namespace AWSIM
 {
     /// <summary>
-    /// Vehicle's wheel class.
+    /// Vehicle's mecanum wheel class.
     /// Receive sleep control, steering tire angle and acceleration from the vehicle class.
     /// </summary>
     [RequireComponent(typeof(WheelCollider))]
@@ -105,21 +106,6 @@ namespace AWSIM
                 skiddingCancelRate = newValue;
         }
 
-/*
-        /// <summary>
-        /// Update wheel steer angle. called by Vehicle's FixedUpdate()
-        /// </summary>
-        public void UpdateWheelSteerAngle(float steerAngle)
-        {
-            // Set a non-zero value to stable the sleep behavior.
-            if (steerAngle == 0)
-                steerAngle = 0.00001f;
-
-            if (wheelCollider.steerAngle != steerAngle)
-                wheelCollider.steerAngle = steerAngle;
-        }
-*/
-
         /// <summary>
         /// Update wheel hit. called by Vehicle's FixedUpdate()
         /// </summary>
@@ -161,14 +147,13 @@ namespace AWSIM
 
             // Apply drive force.
             // Apply a force that will result in the commanded acceleration.
-            Quaternion qtRotAroundZAxisLocal 
-            = new Quaternion(0.0f, Mathf.Sin(angleOfForceApplication/2.0f), 0.0f, Mathf.Cos(angleOfForceApplication/2.0f));
-            Quaternion qtRotAroundZAxisGlobal = vehicleRigidbody.transform.rotation * qtRotAroundZAxisLocal;
+            Quaternion qtWorldToVehicle = vehicleRigidbody.transform.rotation;
+            Quaternion qtVehicleToWorld = Quaternion.Inverse(qtWorldToVehicle);
+            Quaternion qtRotAroundZAxisLocal = new Quaternion(0.0f, Mathf.Sin(angleOfForceApplication/2.0f), 0.0f, Mathf.Cos(angleOfForceApplication/2.0f));
 
-            var driveForce = acceleration * (qtRotAroundZAxisGlobal * wheelHit.forwardDir);
+            var driveForce = acceleration * ((qtWorldToVehicle * qtRotAroundZAxisLocal * qtVehicleToWorld) * wheelHit.forwardDir);
             vehicleRigidbody.AddForceAtPosition(driveForce, wheelHit.point, ForceMode.Acceleration);
-            Debug.Log("Label:" + label + ", wheelHit.forwardDir:" + wheelHit.forwardDir + ", qtRot * wheelHit.forwardDir:" + qtRotAroundZAxisGlobal * wheelHit.forwardDir
-              + ", driveForce:" + driveForce);
+            Debug.Log("Label:" + label + ", wheelHit.forwardDir:" + wheelHit.forwardDir + ", driveForce:" + driveForce);
 /*
             // Counteracts the sideway force of the tire.
             // TODO: more accurate calculation method.

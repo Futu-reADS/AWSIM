@@ -8,7 +8,7 @@ namespace AWSIM
     /// <summary>
     /// VehiclMecanum ROS2 utility static class.
     /// </summary>
-    public static class VehiclMecanumROS2Utility
+    public static class MecanumVehicleROS2Utility
     {
     /*
         /// <summary>

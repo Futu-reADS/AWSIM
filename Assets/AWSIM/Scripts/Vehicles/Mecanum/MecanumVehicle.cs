@@ -61,7 +61,7 @@ namespace AWSIM
     // - wheel radius (m)                               : Wheel settings
 
     // TODO: Write detailed documentation about the vehicle.
-    public class VehicleMecanum : MonoBehaviour
+    public class MecanumVehicle : MonoBehaviour
     {
         public enum Shift
         {
@@ -345,7 +345,7 @@ namespace AWSIM
                 //m_rigidbody.velocity = CmdVelLinear;
                 //AngularVelocity = CmdVelAngular;
                 if (ComputeVehicleStateCnt == 0) {
-                    Debug.Log("CmdVel:("+CmdVel.Linear.x+", "+CmdVel.Linear.y+", "+CmdVel.Angular+")");;
+                    // Debug.Log("CmdVel:("+CmdVel.Linear.x+", "+CmdVel.Linear.y+", "+CmdVel.Angular+")");;
                     // Debug.Log("m_rigidbody.velocity:("+m_rigidbody.velocity.x+", "+m_rigidbody.velocity.y+", "+m_rigidbody.velocity.z+")");
                 }
                 if (++ComputeVehicleStateCnt >= 100) {
@@ -382,9 +382,17 @@ namespace AWSIM
             bool CanSleep()
             {
                 if (IsCanSleepVelocity() && IsCanSleepInput()) {
-                    return true;
+                    sleepTimer += Time.deltaTime;
+                    if (sleepTimer >= sleepTimeThreshold)
+                        return true;
+                    else
+                        return false;
                 }
-                return false;
+                else
+                {
+                    sleepTimer = 0.0f;
+                    return false;
+                }
 /*
                 // In parking ear, if the wheel is on the ground, put it to sleep.
                 if (IsEachWheelGrounded() && AutomaticShiftInput == Shift.PARKING)
@@ -516,8 +524,9 @@ namespace AWSIM
                 estimatedVel.Linear.x = linear.x;
                 estimatedVel.Linear.y = linear.y;
                 estimatedVel.Angular = ROS2Utility.UnityToRosPosition(-AngularVelocity).z;
+                
                 if (EstimateVelocityDispCnt == 0) {
-                    Debug.Log("estimatedVel:("+estimatedVel.Linear.x+", "+estimatedVel.Linear.y+", "+linear.z+", "+estimatedVel.Angular+")");;
+                    // Debug.Log("estimatedVel:("+estimatedVel.Linear.x+", "+estimatedVel.Linear.y+", "+linear.z+", "+estimatedVel.Angular+")");;
                 }
                 if (++EstimateVelocityDispCnt >= 100) {
                     EstimateVelocityDispCnt = 0;

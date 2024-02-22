@@ -10,8 +10,8 @@ namespace AWSIM
     /// This class subscribes to the vehicleCommand and turnSignal  msg output from Autoware to ROS, 
     /// and after converting the msg, it inputs it to the Vehicle class of E2ESimualtor.
     /// </summary>
-    [RequireComponent(typeof(VehicleMecanum))]
-    public class VehicleMecanumRosInput : MonoBehaviour
+    [RequireComponent(typeof(MecanumVehicle))]
+    public class MecanumVehicleRosInput : MonoBehaviour
     {
         /*
         [SerializeField] string turnIndicatorsCommandTopic = "/control/command/turn_indicators_cmd";
@@ -23,7 +23,7 @@ namespace AWSIM
         [SerializeField] string cmdVelTopic = "/cmd_vel";
 
         [SerializeField] QoSSettings qosSettings = new QoSSettings();
-        [SerializeField] VehicleMecanum vehicle;
+        [SerializeField] MecanumVehicle vehicle;
 
         // subscribers.
         /*
@@ -53,7 +53,7 @@ namespace AWSIM
         void Reset()
         {
             if (vehicle == null)
-                vehicle = GetComponent<VehicleMecanum>();
+                vehicle = GetComponent<MecanumVehicle>();
 
             // initialize default QoS params.
             qosSettings.ReliabilityPolicy = ReliabilityPolicy.QOS_POLICY_RELIABILITY_RELIABLE;
@@ -143,7 +143,7 @@ namespace AWSIM
                         vehicle.CmdVel.Linear.x = Convert.ToSingle(msg.Linear.X);
                         vehicle.CmdVel.Linear.y = Convert.ToSingle(msg.Linear.Y);
                         vehicle.CmdVel.Angular = Convert.ToSingle(msg.Angular.Z);
-                        //Debug.Log("cmd_vel:("+vehicle.CmdVel.Linear.x+", "+vehicle.CmdVel.Linear.y+", "+vehicle.CmdVel.Angular);
+                        // Debug.Log("cmd_vel:("+vehicle.CmdVel.Linear.x+", "+vehicle.CmdVel.Linear.y+", "+vehicle.CmdVel.Angular)+")");
 
                     });
 

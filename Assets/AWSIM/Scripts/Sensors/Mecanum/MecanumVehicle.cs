@@ -8,7 +8,7 @@ namespace AWSIM
     /// <summary>
     /// Output Autoware's Vehicle status topic.
     /// </summary>
-    public class VehicleMecanumReportRos2Publisher : MonoBehaviour
+    public class MecanumVehicleReportRos2Publisher : MonoBehaviour
     {
         /*
         /// <summary>
@@ -54,7 +54,7 @@ namespace AWSIM
 
         [SerializeField] QoSSettings qosSettings;
 
-        [SerializeField] VehicleMecanum vehicle;
+        [SerializeField] MecanumVehicle vehicle;
 
 /*
         // msgs.
