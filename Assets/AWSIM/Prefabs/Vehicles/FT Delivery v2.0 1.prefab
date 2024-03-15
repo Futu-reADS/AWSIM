@@ -3919,7 +3919,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5865029131659967986, guid: 9351c3661d105f12f9fe2819a1203053, type: 3}
       propertyPath: frameID
-      value: sensor_kit_base_link
+      value: hesai_top_base_link
       objectReference: {fileID: 0}
     - target: {fileID: 5865029131659967986, guid: 9351c3661d105f12f9fe2819a1203053, type: 3}
       propertyPath: pcl24Topic
@@ -3927,7 +3927,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5865029131659967986, guid: 9351c3661d105f12f9fe2819a1203053, type: 3}
       propertyPath: pcl48Topic
-      value: /sensing/lidar/top/pointcloud_raw_ex
+      value: /sensing/lidar/top/hesai_points
+      objectReference: {fileID: 0}
+    - target: {fileID: 5865029131659967986, guid: 9351c3661d105f12f9fe2819a1203053, type: 3}
+      propertyPath: publishPCL24
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5865029131659967986, guid: 9351c3661d105f12f9fe2819a1203053, type: 3}
       propertyPath: qosSettings.Depth
