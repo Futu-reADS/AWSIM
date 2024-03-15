@@ -27,12 +27,10 @@ namespace AWSIM
         /// </summary>
         public bool IsSleep { get; private set; }
 
-/*
         /// <summary>
-        /// Steering angle of the wheel.
+        /// Voltage (in duty-ratio) of motor
         /// </summary>
-        public float SteerAngle => wheelCollider.steerAngle;
-*/
+        public float motorVoltage;
 
         // latest wheel hit. This value updated according to the FixedUpdate() of the vehicle.
         WheelHit wheelHit;
@@ -40,12 +38,30 @@ namespace AWSIM
         // Cached rigidbody of the vehicle to which the wheelcollider is attached.
         Rigidbody vehicleRigidbody;
 
+        /// <summary>
+        /// Radius of wheel
+        /// </summary>
+        [SerializeField]
+        public float radius;
+
+        /// <summary>
+        /// Deceleration gear ratio
+        /// </summary>
+        [SerializeField]
+        public float decelGearRatio;
+
+        // Cached rigidbody of the vehicle to which the wheelcollider is attached.
+        DCMotor dcMotor;
+
+
         // Coefficient for cancelling the skidding while stopping of the tire.
         float skiddingCancelRate;
 
         // angle (in rad) of area where mecanum wheel touches the ground 
         // FL, RR: -0.785  FR, RL: +0.785
         public float angleOfForceApplication;
+
+        const float M_SQRT2 = 1.41421356F;
 
         void Reset()
         {
@@ -55,6 +71,9 @@ namespace AWSIM
             wheelCollider = GetComponent<WheelCollider>();
             wheelCollider.radius = 0.05f;
             wheelCollider.suspensionDistance = 0.2f;
+
+            decelGearRatio = 5.7f;
+            radius = 0.075f;
 
             angleOfForceApplication = 0;
         }
@@ -129,6 +148,22 @@ namespace AWSIM
         }
 
         /// <summary>
+        /// Update wheel's rotational speed
+        /// </summary>
+        public void UpdateSpeed()
+        {
+            Quaternion qtWorldToVehicle = vehicleRigidbody.transform.rotation;
+            Quaternion qtVehicleToWorld = Quaternion.Inverse(qtWorldToVehicle);
+            Quaternion qtRotAroundZAxisLocal = new Quaternion(0.0f, Mathf.Sin(angleOfForceApplication/2.0f), 0.0f, Mathf.Cos(angleOfForceApplication/2.0f));
+
+            // Calculate on vehicle's coordinate
+            Vector3 relativePosWrtCenter = wheelVisualTransform.localPosition; 
+            Vector3 wheelSpeed = (qtWorldToVehicle * vehicleRigidbody.velocity) + Vector3.Cross(vehicleRigidbody.angularVelocity, relativePosWrtCenter);
+            dcMotor.speed = (wheelSpeed.x - wheelSpeed.z) / radius * decelGearRatio;
+            dcMotor.voltage = motorVoltage;
+        }
+
+        /// <summary>
         /// Apply the force that the tire outputs to the forward and sideway.
         /// </summary>
         /// <param name="acceleration"></param>
@@ -140,10 +175,6 @@ namespace AWSIM
                 return;
             }
             //Debug.Log("Wheel is grounded.");
-            //acceleration = 0.0f;
-            // Apply cancel force.
-            //var lateralCancelForce = GetSkiddingCancelForce();
-            //vehicleRigidbody.AddForceAtPosition(lateralCancelForce, wheelHit.point, ForceMode.Force);
 
             // Apply drive force.
             // Apply a force that will result in the commanded acceleration.
@@ -151,9 +182,16 @@ namespace AWSIM
             Quaternion qtVehicleToWorld = Quaternion.Inverse(qtWorldToVehicle);
             Quaternion qtRotAroundZAxisLocal = new Quaternion(0.0f, Mathf.Sin(angleOfForceApplication/2.0f), 0.0f, Mathf.Cos(angleOfForceApplication/2.0f));
 
+#if true
+            // Apply force
+            var driveForce = dcMotor.torque * decelGearRatio / radius * ((qtWorldToVehicle * qtRotAroundZAxisLocal * qtVehicleToWorld) * wheelHit.forwardDir) * M_SQRT2;
+            vehicleRigidbody.AddForceAtPosition(driveForce, wheelHit.point, ForceMode.Acceleration);
+
+#else
             var driveForce = acceleration * ((qtWorldToVehicle * qtRotAroundZAxisLocal * qtVehicleToWorld) * wheelHit.forwardDir);
             vehicleRigidbody.AddForceAtPosition(driveForce, wheelHit.point, ForceMode.Acceleration);
             Debug.Log("Label:" + label + ", wheelHit.forwardDir:" + wheelHit.forwardDir + ", driveForce:" + driveForce);
+#endif
 /*
             // Counteracts the sideway force of the tire.
             // TODO: more accurate calculation method.

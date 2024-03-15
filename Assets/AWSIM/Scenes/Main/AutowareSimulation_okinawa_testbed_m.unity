@@ -3803,7 +3803,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4981081891045692865, guid: 2111661dd647bd53a8a669429b1ccddb, type: 3}
       propertyPath: m_Mass
-      value: 10
+      value: 40
       objectReference: {fileID: 0}
     - target: {fileID: 4981081891045692866, guid: 2111661dd647bd53a8a669429b1ccddb, type: 3}
       propertyPath: m_Enabled
@@ -3945,7 +3945,7 @@ MonoBehaviour:
     wheelTreadLength: 0.3
     wheelBaseLength: 0.3
     wheelRadius: 0.05
-    Kp: 0.007
+    Kp: 0.01
     Ki: 0
     c: 33.5
   AutomaticShiftInput: 0
@@ -4794,17 +4794,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38e4fab8e1763f9b0a05d7ec6fe0f806, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  velocityReportTopic: /vehicle/status/velocity_status
-  frameId: base_link
-  PublishHz: 30
-  qosSettings:
-    ReliabilityPolicy: 0
-    DurabilityPolicy: 0
-    HistoryPolicy: 0
-    Depth: 0
-  vehicle: {fileID: 1075227070}
-  initialized: 0
-  timer: 0
 --- !u!114 &1672697011 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 9027057599777832477, guid: 58d73df60b244d146bdf5f5896f78355, type: 3}
