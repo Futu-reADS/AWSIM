@@ -3340,13 +3340,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1040270286}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 89fd14584819d7a5ebce85d44fbcb82e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   maximumTorque: 3.67
-  maximumSpeed: 26.18
+  maximumSpeed: 33.51
   MaximumVoltage: 24
   armatureResistance: 0.37
   backEmfConstant: 0.9167325
@@ -3972,6 +3972,10 @@ PrefabInstance:
       propertyPath: m_Mass
       value: 40
       objectReference: {fileID: 0}
+    - target: {fileID: 4981081891045692865, guid: 2111661dd647bd53a8a669429b1ccddb, type: 3}
+      propertyPath: m_IsKinematic
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4981081891045692866, guid: 2111661dd647bd53a8a669429b1ccddb, type: 3}
       propertyPath: m_Enabled
       value: 0
@@ -4120,7 +4124,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   centerOfMassTransform: {fileID: 1075227067}
   useInertia: 0
-  inertia: {x: 0, y: 0, z: 0}
+  inertia: {x: 0.11, y: 0.18, z: 0.11}
   sleepVelocityThreshold: 0.02
   sleepTimeThreshold: 0
   SkiddingCancelRate: 0
@@ -4211,13 +4215,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1127413238}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 89fd14584819d7a5ebce85d44fbcb82e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   maximumTorque: 3.67
-  maximumSpeed: 26.18
+  maximumSpeed: 33.15
   MaximumVoltage: 24
   armatureResistance: 0.37
   backEmfConstant: 0.9167325
@@ -4456,7 +4460,7 @@ MonoBehaviour:
   wheelVisualTransform: {fileID: 913249412}
   label: FR
   radius: 0.075
-  rollerAxisAngleDeg: 45
+  rollerAxisAngleDeg: -135
   dcMotor: {fileID: 1217602099}
 --- !u!114 &1217602099
 MonoBehaviour:
@@ -4465,13 +4469,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1217602092}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 89fd14584819d7a5ebce85d44fbcb82e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   maximumTorque: 3.67
-  maximumSpeed: 26.18
+  maximumSpeed: 33.15
   MaximumVoltage: 24
   armatureResistance: 0.37
   backEmfConstant: 0.9167325
@@ -5007,7 +5011,7 @@ MonoBehaviour:
   wheelVisualTransform: {fileID: 867381957}
   label: RL
   radius: 0.075
-  rollerAxisAngleDeg: 45
+  rollerAxisAngleDeg: -135
   dcMotor: {fileID: 1626940101}
 --- !u!114 &1626940101
 MonoBehaviour:
@@ -5016,13 +5020,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1626940093}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 89fd14584819d7a5ebce85d44fbcb82e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   maximumTorque: 3.67
-  maximumSpeed: 26.18
+  maximumSpeed: 33.15
   MaximumVoltage: 24
   armatureResistance: 0.37
   backEmfConstant: 0.9167325

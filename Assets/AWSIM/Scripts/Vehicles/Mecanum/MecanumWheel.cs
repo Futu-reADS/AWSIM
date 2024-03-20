@@ -14,7 +14,6 @@ namespace AWSIM
     {
         [SerializeField] WheelCollider wheelCollider;
         [SerializeField] Transform wheelVisualTransform;
-
         [SerializeField] string label;
 
         /// <summary>
@@ -28,9 +27,21 @@ namespace AWSIM
         public bool IsSleep { get; private set; }
 
         /// <summary>
-        /// Voltage (in duty-ratio) of motor
+        /// Radius of wheel
         /// </summary>
-        public float motorVoltage;
+        [SerializeField] float radius;
+
+        /// <summary>
+        /// Angle (in rad) of the axis of the roller that touches the ground with respect to the axis of the wheel 
+        /// Unit: degree, positive value clock-wise (FL, RR: -45  FR, RL: 45)
+        /// </summary>
+        [SerializeField] float rollerAxisAngleDeg;
+        float rollerAxisAngle;
+
+        /// <summary>
+        /// DC Motor
+        /// </summary>
+        public DCMotor dcMotor;
 
         // latest wheel hit. This value updated according to the FixedUpdate() of the vehicle.
         WheelHit wheelHit;
@@ -38,30 +49,30 @@ namespace AWSIM
         // Cached rigidbody of the vehicle to which the wheelcollider is attached.
         Rigidbody vehicleRigidbody;
 
-        /// <summary>
-        /// Radius of wheel
-        /// </summary>
-        [SerializeField]
-        public float radius;
+        // Traction force multiplier relative to force from motor
+        // | F_traction | = tractionCoeff x | F_wheel |
+        float tractionForceMultiplier; 
 
-        /// <summary>
-        /// Deceleration gear ratio
-        /// </summary>
-        [SerializeField]
-        public float decelGearRatio;
+        // Direction of roller's rotation axis in local coordinate
+        Vector3 rollerRotationAxisLocal;
 
-        // Cached rigidbody of the vehicle to which the wheelcollider is attached.
-        DCMotor dcMotor;
+        // Direction of wheel's rotation axis in local coordinate
+        Vector3 wheelRotationAxisLocal;
 
+        // Direction of wheel's forward axis in local coordinate
+        Vector3 wheelForwardAxisLocal;
+
+        Quaternion qtWorldToVehicle;
+        Quaternion qtVehicleToWorld;
+        Quaternion qtRotAroundZAxisLocal;
+
+        // K_factor
+        float sinRollerAngle;
+        float cosRollerAngle;
 
         // Coefficient for cancelling the skidding while stopping of the tire.
         float skiddingCancelRate;
 
-        // angle (in rad) of area where mecanum wheel touches the ground 
-        // FL, RR: -0.785  FR, RL: +0.785
-        public float angleOfForceApplication;
-
-        const float M_SQRT2 = 1.41421356F;
 
         void Reset()
         {
@@ -69,31 +80,52 @@ namespace AWSIM
             // Set WheelCollider's Friction to zero in order to apply our own tire force.
             // TODO: Implement the Editor extension to populate and initialize the Inspector.
             wheelCollider = GetComponent<WheelCollider>();
-            wheelCollider.radius = 0.05f;
+            wheelCollider.radius = 0.075f;
             wheelCollider.suspensionDistance = 0.2f;
 
-            decelGearRatio = 5.7f;
-            radius = 0.075f;
-
-            angleOfForceApplication = 0;
         }
 
         void Awake()
         {
             wheelCollider.ConfigureVehicleSubsteps(1000.0f, 1, 1);
             vehicleRigidbody = wheelCollider.attachedRigidbody;
+            Debug.Log("label:" + label + " vehicleRigidbody:" + vehicleRigidbody);
             wheelCollider.motorTorque = 0.00001f;
+
+            rollerAxisAngle = rollerAxisAngleDeg * Mathf.PI / 180.0f;
+            rollerRotationAxisLocal = new Vector3(Mathf.Cos(rollerAxisAngle), 0, -Mathf.Sin(rollerAxisAngle));
+            wheelRotationAxisLocal = new Vector3(1.0f, 0, 0);
+            wheelForwardAxisLocal = new Vector3(0, 0, 1.0f);
+            sinRollerAngle = Mathf.Sin(rollerAxisAngle);
+            cosRollerAngle = Mathf.Cos(rollerAxisAngle);
         }
 
         // for wheel rotation visual fields.
         float wheelPitchAngle = 0;
         float lastSteerAngle = 0;
 
+        int updateDispCnt = 0;
         void Update()
         {
+
+            if (updateDispCnt == 0) {
+                //Debug.Log("Label:" + label + " MecanumWheel.FixedUpdate() is called.");
+            }
+
+            qtWorldToVehicle = vehicleRigidbody.transform.rotation;
+            qtVehicleToWorld = Quaternion.Inverse(qtWorldToVehicle);
+            qtRotAroundZAxisLocal = new Quaternion(0.0f, Mathf.Sin(rollerAxisAngle/2.0f), 0.0f, Mathf.Cos(rollerAxisAngle/2.0f));
+
             var vehicleVelocity = vehicleRigidbody.velocity;
             var localSpeed = vehicleRigidbody.transform.InverseTransformDirection(vehicleVelocity);
 
+            if (updateDispCnt == 0) {
+                //Debug.Log("dcMotor.Update() is about to be called.");
+            }
+            //dcMotor.Update();
+
+            //UpdateSpeed();
+            //UpdateWheelForce();
             //UpdateVisual(localSpeed.z, SteerAngle);
             UpdateVisual(localSpeed.z, 0);
 
@@ -152,46 +184,93 @@ namespace AWSIM
         /// </summary>
         public void UpdateSpeed()
         {
-            Quaternion qtWorldToVehicle = vehicleRigidbody.transform.rotation;
-            Quaternion qtVehicleToWorld = Quaternion.Inverse(qtWorldToVehicle);
-            Quaternion qtRotAroundZAxisLocal = new Quaternion(0.0f, Mathf.Sin(angleOfForceApplication/2.0f), 0.0f, Mathf.Cos(angleOfForceApplication/2.0f));
+            // Calculate wheel's position relative to vehicle's center expressed in world coordinate
+            Vector3 positionRelativeToVehicle =
+                vehicleRigidbody.transform.InverseTransformPoint(transform.position);
+            Vector3 armFromCenter = vehicleRigidbody.transform.TransformVector(positionRelativeToVehicle);
 
-            // Calculate on vehicle's coordinate
-            Vector3 relativePosWrtCenter = wheelVisualTransform.localPosition; 
-            Vector3 wheelSpeed = (qtWorldToVehicle * vehicleRigidbody.velocity) + Vector3.Cross(vehicleRigidbody.angularVelocity, relativePosWrtCenter);
-            dcMotor.speed = (wheelSpeed.x - wheelSpeed.z) / radius * decelGearRatio;
-            dcMotor.voltage = motorVoltage;
+            // calculate wheel's linear velocity in world coordinate
+            Vector3 wheelSpeed = 
+                vehicleRigidbody.velocity + 
+                 Vector3.Cross(vehicleRigidbody.angularVelocity, armFromCenter);
+
+            // calculate wheel's linear velocity in wheel's coordinate
+            Vector3 localWheelSpeed = transform.InverseTransformVector(wheelSpeed); 
+
+            // calculate angular velocity of motor
+            if (IsGrounded) {
+                dcMotor.SetSpeed(-Vector3.Dot(localWheelSpeed, rollerRotationAxisLocal) / sinRollerAngle / radius);
+            } else {
+                dcMotor.SetSpeed(0.0f);
+            }
+
+            if (updateDispCnt == 0) {
+                Debug.Log("TIM:" + Time.time + ", Label:" + label + ", dcMotor.Speed:" + dcMotor.Speed +
+                ", wheelSpeed:" + wheelSpeed + ", localWheelSpeed:" + localWheelSpeed +
+                ", vehicleRigidbody(.velocity:" + vehicleRigidbody.velocity +
+                ", .angularVelocity:" + vehicleRigidbody.angularVelocity +
+                ") , positionRelativeToVehicle:" + positionRelativeToVehicle);
+            }
+            dcMotor.Update();
         }
 
         /// <summary>
         /// Apply the force that the tire outputs to the forward and sideway.
         /// </summary>
-        /// <param name="acceleration"></param>
         public void UpdateWheelForce(float acceleration)
         {
-            //Debug.Log("Is wheel grounded?" + IsGrounded);
+            if (updateDispCnt == 0) {
+                //Debug.Log("Label:" + label + " Is wheel grounded?" + IsGrounded);
+            }
             if (IsGrounded == false) {
                 //vehicleRigidbody.velocity = new Vector3(0.0f,0.0f,0.0f);
+                if (acceleration != 0) {
+                    Debug.Log("TIM:" + Time.time + ", Label:" + label + ", duty:" + acceleration + " (NOT GROUNDED)");
+                }
                 return;
             }
-            //Debug.Log("Wheel is grounded.");
+            if (updateDispCnt == 0) {
+                //Debug.Log("Wheel is grounded.");
+            }
+
+            qtWorldToVehicle = vehicleRigidbody.transform.rotation;
+            qtVehicleToWorld = Quaternion.Inverse(qtWorldToVehicle);
+            qtRotAroundZAxisLocal = new Quaternion(0.0f, Mathf.Sin(-rollerAxisAngle/2.0f), 0.0f, Mathf.Cos(-rollerAxisAngle/2.0f));
 
             // Apply drive force.
             // Apply a force that will result in the commanded acceleration.
-            Quaternion qtWorldToVehicle = vehicleRigidbody.transform.rotation;
-            Quaternion qtVehicleToWorld = Quaternion.Inverse(qtWorldToVehicle);
-            Quaternion qtRotAroundZAxisLocal = new Quaternion(0.0f, Mathf.Sin(angleOfForceApplication/2.0f), 0.0f, Mathf.Cos(angleOfForceApplication/2.0f));
-
-#if true
+#if false
+            // Motor model occilates!!! 20240320 
+            // Update motor's state
+            dcMotor.SetDuty(acceleration);
+            dcMotor.Update();
+            // Calculate roller's axis in world coordinate
+            //var rollerAxis = vehicleRigidbody.transform.TransformVector(rollerRotationAxisLocal);
+            var rollerAxis = transform.TransformVector(rollerRotationAxisLocal);    // from local to world
+            //var rollerAxis = transform.InverseTransformVector(wheelHit.forwardDir);
+            //var rollerAxis = qtWorldToVehicle * qtRotAroundZAxisLocal * qtVehicleToWorld*  wheelHit.forwardDir;
+            // Calculate traction force in world coordinate
+            var driveForce = (- dcMotor.Torque / radius * rollerAxis / sinRollerAngle );    // 0.6: relaxation parameter
             // Apply force
-            var driveForce = dcMotor.torque * decelGearRatio / radius * ((qtWorldToVehicle * qtRotAroundZAxisLocal * qtVehicleToWorld) * wheelHit.forwardDir) * M_SQRT2;
             vehicleRigidbody.AddForceAtPosition(driveForce, wheelHit.point, ForceMode.Acceleration);
-
+            if (updateDispCnt == 0) {
+                Debug.Log("TIM:" + Time.time + ", Label:" + label + ", duty:" + acceleration + ", rollerAxis:" + rollerAxis + ", torque:" + dcMotor.Torque + ", driveForce:" + driveForce + ", speed:" + dcMotor.Speed + ", radius:" + radius);
+            }
 #else
-            var driveForce = acceleration * ((qtWorldToVehicle * qtRotAroundZAxisLocal * qtVehicleToWorld) * wheelHit.forwardDir);
+            var rollerAxis = transform.TransformVector(rollerRotationAxisLocal);    // from local to world
+            var driveForce = acceleration * rollerAxis; // ((qtWorldToVehicle * qtRotAroundZAxisLocal * qtVehicleToWorld) * wheelHit.forwardDir);
             vehicleRigidbody.AddForceAtPosition(driveForce, wheelHit.point, ForceMode.Acceleration);
-            Debug.Log("Label:" + label + ", wheelHit.forwardDir:" + wheelHit.forwardDir + ", driveForce:" + driveForce);
+            if (acceleration != 0) {
+                Debug.Log("TIM:" + Time.time + ", Label:" + label + ", acceleration:" + acceleration + ", wheelHit.forwardDir:" + wheelHit.forwardDir +
+                 ", driveForce:" + driveForce);
+            }
 #endif
+
+            updateDispCnt = updateDispCnt + 1;
+            if (50 <= updateDispCnt) {
+                updateDispCnt = 0;
+            }
+
 /*
             // Counteracts the sideway force of the tire.
             // TODO: more accurate calculation method.

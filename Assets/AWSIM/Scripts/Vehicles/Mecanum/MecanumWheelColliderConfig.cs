@@ -22,15 +22,15 @@ namespace AWSIM
 
             // Set WheelCollider intial values.
             wheelCollider.mass = 0.15f;
-            wheelCollider.radius = 0.05f;
-            wheelCollider.wheelDampingRate = 0.25f;
-            wheelCollider.suspensionDistance = 0.2f;
+            wheelCollider.radius = 0.075f;
+            wheelCollider.wheelDampingRate = 1.0f; // 0.25f;
+            wheelCollider.suspensionDistance = 0.05f;
             wheelCollider.forceAppPointDistance = 0f;
             wheelCollider.center = Vector3.zero;
             wheelCollider.suspensionSpring = new JointSpring()
             {
-                spring = 35000f,
-                damper = 3500f,
+                spring = 100f, // 35000f,
+                damper = 1000f,  // 3500f,
                 targetPosition = 0.5f,
             };
             var fc = new WheelFrictionCurve()

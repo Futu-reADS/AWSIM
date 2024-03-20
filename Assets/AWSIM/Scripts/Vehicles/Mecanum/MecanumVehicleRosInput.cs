@@ -41,15 +41,6 @@ namespace AWSIM
         bool isEmergency = false;
         float emergencyDeceleration = -3.0f; // m/s^2
 
-/*
-        // Latest value of TurnSignals.
-        // HAZARD and LEFT/RIGHT are different msgs in Autoware.universe.
-        // Priority : HAZARD > LEFT/RIGHT > NONE
-        Vehicle.TurnSignal turnIndicatorsSignal = Vehicle.TurnSignal.NONE;
-        Vehicle.TurnSignal hazardLightsSignal = Vehicle.TurnSignal.NONE;
-        Vehicle.TurnSignal input = Vehicle.TurnSignal.NONE;
-*/
-
         void Reset()
         {
             if (vehicle == null)
@@ -143,7 +134,7 @@ namespace AWSIM
                         vehicle.CmdVel.Linear.x = Convert.ToSingle(msg.Linear.X);
                         vehicle.CmdVel.Linear.y = Convert.ToSingle(msg.Linear.Y);
                         vehicle.CmdVel.Angular = Convert.ToSingle(msg.Angular.Z);
-                        // Debug.Log("cmd_vel:("+vehicle.CmdVel.Linear.x+", "+vehicle.CmdVel.Linear.y+", "+vehicle.CmdVel.Angular)+")");
+                        Debug.Log("/cmd_vel:("+vehicle.CmdVel.Linear.x+", "+vehicle.CmdVel.Linear.y+", "+vehicle.CmdVel.Angular);
 
                     });
 

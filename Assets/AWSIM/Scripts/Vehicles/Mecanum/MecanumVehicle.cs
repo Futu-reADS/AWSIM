@@ -300,8 +300,6 @@ namespace AWSIM
             // Set inertia values.
             if (useInertia)
                 m_rigidbody.inertiaTensor = inertia;
-
-            
         }
 
         int ComputeVehicleStateCnt = 0;
@@ -393,38 +391,6 @@ namespace AWSIM
                     sleepTimer = 0.0f;
                     return false;
                 }
-/*
-                // In parking ear, if the wheel is on the ground, put it to sleep.
-                if (IsEachWheelGrounded() && AutomaticShiftInput == Shift.PARKING)
-                    return true;
-
-                // Is wheel grounded ? Is less than sleepVelocityThreshold ? Is input gear & acceleration can sleep?
-                else if (IsEachWheelGrounded() && IsCanSleepVelocity() && IsCanSleepInput())
-                {
-                    sleepTimer += Time.deltaTime;
-                    if (sleepTimer >= sleepTimeThreshold)
-                        return true;
-                    else
-                        return false;
-                }
-                else
-                {
-                    sleepTimer = 0.0f;
-                    return false;
-                }
-                // ----- inner methods -----
-
-                // Is wheel grounded ?
-                bool IsEachWheelGrounded()
-                {
-                    foreach (var wheel in wheels)
-                    {
-                        if (wheel.IsGrounded == false)
-                            return false;
-                    }
-                    return true;
-                }
-*/
 
                 // Is less than sleepVelocityThreshold ?
                 bool IsCanSleepVelocity()
@@ -444,7 +410,6 @@ namespace AWSIM
                     }
                     return false;
                 }
-
 
             }
 
@@ -491,12 +456,18 @@ namespace AWSIM
             void UpdateWheelsForce()
             {
                 CalculateAccelByFeedback();
+                //ComputeInverseKinematic(wheelAcceleration, CmdVel);    // open loop control
+                //Debug.Log("CmdVel[ "+CmdVel.Linear.x+", " + CmdVel.Linear.y+", "+CmdVel.Angular+" ]");
 
-                int idx = 0;
-                foreach (var wheel in wheels) {
-                    // Debug.Log("wheelAcceleration["+idx+"]: " +  wheelAcceleration[idx]);
-                    wheel.UpdateWheelForce(wheelAcceleration[idx]);
-                    idx++;
+
+                int idx;
+                for (idx=0; idx < wheels.Length; idx++) {
+                    wheels[idx].UpdateSpeed();
+                }
+                for (idx=0; idx < wheels.Length; idx++) {
+                    //Debug.Log("wheelAcceleration["+idx+"]: " +  wheelAcceleration[idx]);
+                    wheels[idx].UpdateWheelForce(wheelAcceleration[idx]);
+                    //wheel.dcMotor.Voltage = wheel.dcMotor.MaximumVoltage * wheelAcceleration[idx];
                 }
             }
 
@@ -513,10 +484,10 @@ namespace AWSIM
 
             void ComputeInverseKinematic(float[] perWheelData, Twist2D t) {
                 // FL, FR, RL, RR
-                perWheelData[0] = ((t.Linear.x - t.Linear.y - t.Angular*controlParam.wheelGeometry())/controlParam.wheelRadius)*controlParam.c;
-                perWheelData[1] = ((t.Linear.x + t.Linear.y + t.Angular*controlParam.wheelGeometry())/controlParam.wheelRadius)*controlParam.c;
-                perWheelData[2] = ((t.Linear.x + t.Linear.y - t.Angular*controlParam.wheelGeometry())/controlParam.wheelRadius)*controlParam.c;
-                perWheelData[3] = ((t.Linear.x - t.Linear.y + t.Angular*controlParam.wheelGeometry())/controlParam.wheelRadius)*controlParam.c;
+                perWheelData[0] = ((t.Linear.x - t.Linear.y - t.Angular*controlParam.wheelGeometry())/controlParam.wheelRadius)/controlParam.c;
+                perWheelData[1] = ((t.Linear.x + t.Linear.y + t.Angular*controlParam.wheelGeometry())/controlParam.wheelRadius)/controlParam.c;
+                perWheelData[2] = ((t.Linear.x + t.Linear.y - t.Angular*controlParam.wheelGeometry())/controlParam.wheelRadius)/controlParam.c;
+                perWheelData[3] = ((t.Linear.x - t.Linear.y + t.Angular*controlParam.wheelGeometry())/controlParam.wheelRadius)/controlParam.c;
             } 
 
             void EstimateVelocity() {
