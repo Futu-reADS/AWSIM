@@ -29,7 +29,7 @@ namespace AWSIM.PointCloudFormats
         {
             return new[]
             {
-                RGLField.XYZ_F32,
+                RGLField.XYZ_VEC3_F32,
                 RGLField.PADDING_32,
                 RGLField.INTENSITY_F32,
                 RGLField.RING_ID_U16,
@@ -47,7 +47,7 @@ namespace AWSIM.PointCloudFormats
         {
             return new[]
             {
-                RGLField.XYZ_F32,
+                RGLField.XYZ_VEC3_F32,
                 RGLField.PADDING_32,
                 RGLField.INTENSITY_F32,
                 RGLField.RING_ID_U16,
@@ -72,9 +72,28 @@ namespace AWSIM.PointCloudFormats
         {
             return new[]
             {
-                RGLField.XYZ_F32,
+                RGLField.XYZ_VEC3_F32,
                 RGLField.ENTITY_ID_I32,
                 RGLField.INTENSITY_F32
+            };
+        }
+    }
+
+    /// <summary>
+    /// Machine learning format for instance/semantic segmentation tasks
+    /// </summary>
+    public static class FormatRadarSmartMicro
+    {
+        public static RGLField[] GetRGLFields()
+        {
+            return new[]
+            {
+                RGLField.XYZ_VEC3_F32,
+                RGLField.RADIAL_SPEED_F32,
+                RGLField.POWER_F32,
+                RGLField.RCS_F32,
+                RGLField.NOISE_F32,
+                RGLField.SNR_F32
             };
         }
     }

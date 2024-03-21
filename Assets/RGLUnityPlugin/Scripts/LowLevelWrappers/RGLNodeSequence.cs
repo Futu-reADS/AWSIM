@@ -226,12 +226,12 @@ namespace RGLUnityPlugin
             return this;
         }
 
-        public RGLNodeSequence AddNodePointsUdpPublishVelodyne(string identifier, RGLVelodyneModel velodyneModel, string deviceIp, string destIp, int destPort)
+        public RGLNodeSequence AddNodePointsUdpPublish(string identifier, RGLLidarModel lidarModel, RGLReturnMode returnMode, RGLUdpOptions udpOptions, string deviceIp, string destIp, int destPort)
         {
             CheckNodeNotExist(identifier);
             RGLNodeHandle handle = new RGLNodeHandle();
-            RGLNativeAPI.NodePointsUdpPublishVelodyne(ref handle.Node, velodyneModel, deviceIp, destIp, destPort);
-            handle.Type = RGLNodeType.POINTS_UDP_PUBLISH_VELODYNE;
+            RGLNativeAPI.NodePointsUdpPublish(ref handle.Node, lidarModel, returnMode, udpOptions, deviceIp, destIp, destPort);
+            handle.Type = RGLNodeType.POINTS_UDP_PUBLISH;
             handle.Identifier = identifier;
             AddNode(handle);
             return this;
@@ -265,6 +265,41 @@ namespace RGLUnityPlugin
             RGLNodeHandle handle = new RGLNodeHandle();
             RGLNativeAPI.NodeGaussianNoiseDistance(ref handle.Node, mean, stDev, stDevRisePerMeter);
             handle.Type = RGLNodeType.GAUSSIAN_NOISE_DISTANCE;
+            handle.Identifier = identifier;
+            AddNode(handle);
+            return this;
+        }
+
+        public RGLNodeSequence AddNodePointsRemoveGround(string identifier, float groundAngleThreshold, float groundDistanceThreshold, float groundFilterDistance)
+        {
+            CheckNodeNotExist(identifier);
+            RGLNodeHandle handle = new RGLNodeHandle();
+            RGLNativeAPI.NodePointsRemoveGround(ref handle.Node, groundAngleThreshold, groundDistanceThreshold, groundFilterDistance);
+            handle.Type = RGLNodeType.POINTS_REMOVE_GROUND;
+            handle.Identifier = identifier;
+            AddNode(handle);
+            return this;
+        }
+
+        public RGLNodeSequence AddNodePointsRadarPostprocess(string identifier, float distanceSeparation, float azimuthSeparation)
+        {
+            CheckNodeNotExist(identifier);
+            RGLNodeHandle handle = new RGLNodeHandle();
+            RGLNativeAPI.NodePointsRadarPostprocess(ref handle.Node, distanceSeparation, azimuthSeparation);
+            handle.Type = RGLNodeType.POINTS_RADAR_POSTPROCESS;
+            handle.Identifier = identifier;
+            AddNode(handle);
+            return this;
+        }
+
+        public RGLNodeSequence AddNodePointsSimulateSnow(string identifier, float minRange, float maxRange, float rainRate,
+            float meanSnowflakeDiameter, float terminalVelocity, float density, Int32 numChannels, float beamDivergence)
+        {
+            CheckNodeNotExist(identifier);
+            RGLNodeHandle handle = new RGLNodeHandle();
+            RGLNativeAPI.NodePointsSimulateSnow(ref handle.Node, minRange, maxRange, rainRate,
+                meanSnowflakeDiameter, terminalVelocity, density, numChannels, beamDivergence);
+            handle.Type = RGLNodeType.POINTS_SIMULATE_SNOW;
             handle.Identifier = identifier;
             AddNode(handle);
             return this;
@@ -313,10 +348,10 @@ namespace RGLUnityPlugin
             return this;
         }
 
-        public RGLNodeSequence UpdateNodeRaytrace(string identifier, Vector3 linearVelocity, Vector3 angularVelocity)
+        public RGLNodeSequence UpdateNodeRaytrace(string identifier, Vector3 linearVelocity, Vector3 angularVelocity, bool applyRayDistortion)
         {
             RGLNodeHandle handle = ValidateNode(identifier, RGLNodeType.RAYTRACE);
-            RGLNativeAPI.NodeRaytrace(ref handle.Node, linearVelocity, angularVelocity);
+            RGLNativeAPI.NodeRaytrace(ref handle.Node, linearVelocity, angularVelocity, applyRayDistortion);
             return this;
         }
 
@@ -326,7 +361,7 @@ namespace RGLUnityPlugin
             RGLNativeAPI.NodePointsTransform(ref handle.Node, transform);
             return this;
         }
-        
+
         public RGLNodeSequence UpdateNodePointsDownsample(string identifier, Vector3 leafDims)
         {
             RGLNodeHandle handle = ValidateNode(identifier, RGLNodeType.POINTS_DOWNSAMPLE);
@@ -341,10 +376,10 @@ namespace RGLUnityPlugin
             return this;
         }
 
-        public RGLNodeSequence UpdateNodePointsUdpPublishVelodyne(string identifier, RGLVelodyneModel velodyneModel, string deviceIp, string destIp, int destPort)
+        public RGLNodeSequence UpdateNodePointsUdpPublish(string identifier, RGLLidarModel lidarModel, RGLReturnMode returnMode, RGLUdpOptions udpOptions, string deviceIp, string destIp, int destPort)
         {
-            RGLNodeHandle handle = ValidateNode(identifier, RGLNodeType.POINTS_UDP_PUBLISH_VELODYNE);
-            RGLNativeAPI.NodePointsUdpPublishVelodyne(ref handle.Node, velodyneModel, deviceIp, destIp, destPort);
+            RGLNodeHandle handle = ValidateNode(identifier, RGLNodeType.POINTS_UDP_PUBLISH);
+            RGLNativeAPI.NodePointsUdpPublish(ref handle.Node, lidarModel, returnMode, udpOptions, deviceIp, destIp, destPort);
             return this;
         }
 
@@ -369,6 +404,29 @@ namespace RGLUnityPlugin
             return this;
         }
 
+        public RGLNodeSequence UpdateNodePointsRemoveGround(string identifier, float groundAngleThreshold, float groundDistanceThreshold, float groundFilterDistance)
+        {
+            RGLNodeHandle handle = ValidateNode(identifier, RGLNodeType.POINTS_REMOVE_GROUND);
+            RGLNativeAPI.NodePointsRemoveGround(ref handle.Node, groundAngleThreshold, groundDistanceThreshold, groundFilterDistance);
+            return this;
+        }
+
+        public RGLNodeSequence UpdateNodePointsRadarPostprocess(string identifier, float distanceSeparation, float azimuthSeparation)
+        {
+            RGLNodeHandle handle = ValidateNode(identifier, RGLNodeType.POINTS_RADAR_POSTPROCESS);
+            RGLNativeAPI.NodePointsRadarPostprocess(ref handle.Node, distanceSeparation, azimuthSeparation);
+            return this;
+        }
+
+        public RGLNodeSequence UpdateNodePointsSimulateSnow(string identifier, float minRange, float maxRange, float rainRate,
+            float meanSnowflakeDiameter, float terminalVelocity, float density, Int32 numChannels, float beamDivergence)
+        {
+            RGLNodeHandle handle = ValidateNode(identifier, RGLNodeType.POINTS_SIMULATE_SNOW);
+            RGLNativeAPI.NodePointsSimulateSnow(ref handle.Node, minRange, maxRange, rainRate,
+                meanSnowflakeDiameter, terminalVelocity, density, numChannels, beamDivergence);
+            return this;
+        }
+
         //// NODESEQUENCE OPERATIONS ////
         public int GetResultData<T>(ref T[] data) where T : unmanaged
         {
@@ -385,7 +443,7 @@ namespace RGLUnityPlugin
             return RGLNativeAPI.GraphGetResult<byte>(handle.Node, handle.OutputField, ref data, expectedPointSize);
         }
 
-        public int GetPointCloudCount(string identifier = null, RGLField field = RGLField.XYZ_F32)
+        public int GetPointCloudCount(string identifier = null, RGLField field = RGLField.XYZ_VEC3_F32)
         {
             RGLNodeHandle handle = identifier == null ? GetLastNodeOrNull(true) : ValidateNode(identifier);
             if (handle == null)
@@ -437,6 +495,11 @@ namespace RGLUnityPlugin
             }
         }
 
+        public bool HasNode(string identifier)
+        {
+            return nodes.Count(n => n.Identifier == identifier) != 0;
+        }
+
         public bool IsActive(string identifier)
         {
             return ValidateNode(identifier).Connected;
@@ -454,6 +517,12 @@ namespace RGLUnityPlugin
             {
                 DisconnectNode(node);
             }
+        }
+
+        public void SetPriority(string identifier, int priority)
+        {
+            RGLNodeHandle node = ValidateNode(identifier);
+            RGLNativeAPI.GraphNodeSetPriority(node.Node, priority);
         }
 
         //// PRIVATE HELPERS ////

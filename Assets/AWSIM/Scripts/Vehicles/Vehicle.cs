@@ -114,6 +114,40 @@ namespace AWSIM
         // reference sample (in 1998): https://www.researchgate.net/publication/228945609_Measured_Vehicle_Inertial_Parameters-NHTSA
         [SerializeField] Vector3 inertia;
 
+        /// <summary>
+        /// Change the slip rate of the wheel in the foward direction of this car. 1 no slip, 0 is full slip.
+        /// </summary>
+        public float ForwardSlipMultipler
+        {
+            get
+            {
+                return wheels[0].ForwardSlipMultiplier;
+            }
+
+            set
+            {
+                foreach (var e in wheels)
+                    e.ForwardSlipMultiplier = value;
+            }
+        }
+
+        /// <summary>
+        /// Change the slip rate of the wheel in the sideway direction of this car. 1 no slip, 0 is full slip.
+        /// </summary>
+        public float SidewaySlipMultipler
+        {
+            get
+            {
+                return wheels[0].SidewaySlipMultiplier;
+            }
+
+            set
+            {
+                foreach (var e in wheels)
+                    e.SidewaySlipMultiplier = value;
+            }
+        }
+
         [Header("Physics Settings (experimental)")]
 
         // Threshold for Rigidbody Sleep (m/s).
@@ -205,6 +239,21 @@ namespace AWSIM
         /// </summary>
         public Vector3 AngularVelocity { get; private set; }
 
+        /// <summary>
+        /// Vehicle angular velocity in the local coordinate system of the vehicle (rad/s)
+        /// </summary>
+        public Vector3 LocalAngularVelocity => m_transform.InverseTransformDirection(AngularVelocity);
+
+        /// <summary>
+        /// Vehicle angular acceleration (rad/s^2)
+        /// </summary>
+        public Vector3 AngularAcceleration { get; private set; }
+
+        /// <summary>
+        /// Vehicle angular acceleration in the local coordinate system of the vehicle (rad/s^2)
+        /// </summary>
+        public Vector3 LocalAngularAcceleration => m_transform.InverseTransformDirection(AngularAcceleration);
+
 
         private float sleepTimer = 0.0f; ///Count the time until CanSleep is switched to true
 
@@ -219,6 +268,7 @@ namespace AWSIM
         Vector3 lastVelocity;
         Vector3 lastPosition;
         Quaternion lastRotation;
+        Vector3 lastAngularVelocity;
 
         // Sleep position & rotation
         Vector3 sleepPositon;
@@ -238,6 +288,32 @@ namespace AWSIM
             // Set inertia values.
             if (useInertia)
                 m_rigidbody.inertiaTensor = inertia;
+
+            // Initialize with non-slip value
+            ForwardSlipMultipler = 1f;
+            SidewaySlipMultipler = 1f;
+        }
+
+        // GroundSlipMultiplier changes the slip rate.
+        private void OnTriggerEnter(Collider other)
+        {
+            var groundSlipMultiplier = other.GetComponent<GroudSlipMultiplier>();
+            if (groundSlipMultiplier != null)
+            {
+                ForwardSlipMultipler = groundSlipMultiplier.FowardSlip;
+                SidewaySlipMultipler = groundSlipMultiplier.SidewaySlip;
+            }
+        }
+
+        // GroundSlipMultiplier changes the slip rate.
+        private void OnTriggerExit(Collider other)
+        {
+            var groundSlipMultiplier = other.GetComponent<GroudSlipMultiplier>();
+            if (groundSlipMultiplier != null)
+            {
+                ForwardSlipMultipler = 1;       // Default value is 1 if there is no slip.
+                SidewaySlipMultipler = 1;
+            }
         }
 
         void FixedUpdate()
@@ -283,7 +359,9 @@ namespace AWSIM
                 LocalAcceleration = m_transform.InverseTransformDirection(acceleration);
 
                 // Angular velocity.
+                lastAngularVelocity = AngularVelocity;
                 AngularVelocity = ((transform.rotation.eulerAngles - lastRotation.eulerAngles) / Time.deltaTime) * Mathf.Deg2Rad;
+                AngularAcceleration = ((AngularVelocity - lastAngularVelocity) / Time.deltaTime);
             }
 
             void PreUpdateWheels()
