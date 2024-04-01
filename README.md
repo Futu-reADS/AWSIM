@@ -14,6 +14,8 @@ This scene has been modified for use with the FT Delivery vehicle.
 - Open source software
 - Made with Unity Game Engine
 
+- Support for Mecanum Wheel Chair (2024-04-01)
+
 ## Tutorial
 
 First, try the tutorial !  
@@ -32,6 +34,16 @@ Applies to `tier4/AWSIM` repositories and all content contained in the [Releases
 - assets : CC BY-NC
 
 See also [LICENSE](./LICENSE)
+
+## Mecanum Wheelchair Support
+
+A mecanum wheelchair simulator that subscribes /cmd_vel, does inverse kinematic calculation internally and gives corresponding torque to each mecanum wheel.
+
+![Mecanum Wheel Chair in Simulated environment](<README_MecanumWheelChairSim.png>)
+
+Side view of the mecanum wheelchair:
+
+![Side View](<README_MecanumWheelChairSideView.png>)
 
 ## Contact
 
