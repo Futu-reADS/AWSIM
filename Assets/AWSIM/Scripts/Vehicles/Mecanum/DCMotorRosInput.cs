@@ -12,7 +12,7 @@ namespace AWSIM
     [RequireComponent(typeof(DCMotor))]
     public class DCMotorRosInput : MonoBehaviour
     {
-        [SerializeField] string dutyRatioTopic  = "/dcmotor/duty_ratio";
+        [SerializeField] string dutyRatioTopic = "/dcmotor/duty_ratio";
         [SerializeField] QoSSettings qosSettings = new QoSSettings();
         [SerializeField] DCMotor dcMotor;
 

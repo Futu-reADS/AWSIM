@@ -109,7 +109,8 @@ namespace AWSIM
         {
             [SerializeField] public float wheelTreadLength = 0.3f;
             [SerializeField] public float wheelBaseLength = 0.3f;
-            [SerializeField] public float wheelRadius = 0.25f;
+            [SerializeField] public float wheelRadius = 0.075f;
+            [SerializeField] public static bool useCmdVelFeedback = false;    // True: enable closed-loop feed back for cmd_vel  False: just use the duty command comming from phidget lib
             [SerializeField] public float Kp = 0.00001f;
             [SerializeField] public float Ki = 0.0f;
             [SerializeField] public float c = 1.0f; // 33.5f;
@@ -144,7 +145,7 @@ namespace AWSIM
             public static Twist2D operator *(float c, Twist2D t) {
                 var ret = new Twist2D();
                 ret.Linear = c*t.Linear;
-                ret.Angular = c*t.Angular;
+               ret.Angular = c*t.Angular;
                 return ret;
             }
         }
@@ -287,6 +288,8 @@ namespace AWSIM
         {
             m_rigidbody = GetComponent<Rigidbody>();
             m_transform = transform;
+            Debug.Log("TIME:" + Time.time + "MecanumVehicles.Awake() is called");
+
             wheels = new MecanumWheel[] { frontAxle.LeftWheel, frontAxle.RightWheel, rearAxle.LeftWheel, rearAxle.RightWheel };
             CmdVel = new Twist2D();
             estimatedVel = new Twist2D();
@@ -300,6 +303,8 @@ namespace AWSIM
             // Set inertia values.
             if (useInertia)
                 m_rigidbody.inertiaTensor = inertia;
+
+            Debug.Log("TIME:" + Time.time + "MecanumVehicles.Awake() has stopped");
         }
 
         int ComputeVehicleStateCnt = 0;
@@ -367,7 +372,7 @@ namespace AWSIM
             {
                 // Steer angle is front-only.
                 //frontAxle.LeftWheel.UpdateWheelSteerAngle(SteerAngle);
-                //frontAxle.RightWheel.UpdateWheelSteerAngle(SteerAngle);
+                //fronMecanumVehicle.USE_MOTOR_DYNAMICStAxle.RightWheel.UpdateWheelSteerAngle(SteerAngle);
 
                 foreach (var wheel in wheels)
                 {
@@ -379,6 +384,7 @@ namespace AWSIM
 
             bool CanSleep()
             {
+                //return false;
                 if (IsCanSleepVelocity() && IsCanSleepInput()) {
                     sleepTimer += Time.deltaTime;
                     if (sleepTimer >= sleepTimeThreshold)
@@ -410,7 +416,6 @@ namespace AWSIM
                     }
                     return false;
                 }
-
             }
 
             void UpdateVehicleSleep(bool isSleep)
@@ -443,32 +448,41 @@ namespace AWSIM
                     }
                 }
 
-/*
+
                 // Wheel sleep.
                 foreach (var wheel in wheels)
                 {
                     if (wheel.IsSleep != isSleep)
                         wheel.UpdateWheelSleep(isSleep);
                 }
-*/
+
+
             }
 
             void UpdateWheelsForce()
             {
-                CalculateAccelByFeedback();
-                //ComputeInverseKinematic(wheelAcceleration, CmdVel);    // open loop control
-                //Debug.Log("CmdVel[ "+CmdVel.Linear.x+", " + CmdVel.Linear.y+", "+CmdVel.Angular+" ]");
-
+                if (ControlParam.useCmdVelFeedback) {
+                    CalculateAccelByFeedback();
+                } else {
+                    ComputeInverseKinematic(wheelAcceleration, CmdVel);    // open loop control
+                    //Debug.Log("CmdVel[ "+CmdVel.Linear.x+", " + CmdVel.Linear.y+", "+CmdVel.Angular+" ]");
+                }
 
                 int idx;
                 for (idx=0; idx < wheels.Length; idx++) {
                     wheels[idx].UpdateSpeed();
                 }
                 for (idx=0; idx < wheels.Length; idx++) {
-                    //Debug.Log("wheelAcceleration["+idx+"]: " +  wheelAcceleration[idx]);
-                    wheels[idx].UpdateWheelForce(wheelAcceleration[idx]);
-                    //wheel.dcMotor.Voltage = wheel.dcMotor.MaximumVoltage * wheelAcceleration[idx];
+                    if (ControlParam.useCmdVelFeedback) {
+                        wheels[idx].SetWheelAcceleration(wheelAcceleration[idx]);
+                    } else {
+                        wheels[idx].SetMotorDuty(wheelAcceleration[idx]);
+                    }
+                    wheels[idx].UpdateWheelForce();
                 }
+                //Debug.Log("TIME:" + Time.time + ", wheelForce," +
+                //    wheels[0].acceleration    + "," + wheels[1].acceleration    + "," + wheels[2].acceleration    + "," + wheels[3].acceleration + ", wheelSpeed," +
+                //    wheels[0].dcMotor.Speed + "," + wheels[1].dcMotor.Speed + "," + wheels[2].dcMotor.Speed + "," + wheels[3].dcMotor.Speed);
             }
 
             void CalculateAccelByFeedback() {

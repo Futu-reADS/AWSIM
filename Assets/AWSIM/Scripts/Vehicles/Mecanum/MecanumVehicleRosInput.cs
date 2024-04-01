@@ -134,7 +134,7 @@ namespace AWSIM
                         vehicle.CmdVel.Linear.x = Convert.ToSingle(msg.Linear.X);
                         vehicle.CmdVel.Linear.y = Convert.ToSingle(msg.Linear.Y);
                         vehicle.CmdVel.Angular = Convert.ToSingle(msg.Angular.Z);
-                        Debug.Log("/cmd_vel:("+vehicle.CmdVel.Linear.x+", "+vehicle.CmdVel.Linear.y+", "+vehicle.CmdVel.Angular);
+                        Debug.Log("/cmd_vel:("+vehicle.CmdVel.Linear.x+", "+vehicle.CmdVel.Linear.y+", "+vehicle.CmdVel.Angular+")");
 
                     });
 

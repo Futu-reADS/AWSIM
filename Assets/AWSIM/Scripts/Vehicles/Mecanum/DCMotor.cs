@@ -30,12 +30,17 @@ namespace AWSIM
         /// <summary>
         /// Armature resistance [ohm]. For mecanum drive motor, 0.37[ohm]
         /// </summary>
-        [SerializeField] [Tooltip("Armature resistance [ohm]")]  float armatureResistance;
+        [SerializeField] [Tooltip("Armature resistance [ohm]")] public float ArmatureResistance;
 
         /// <summary>
         /// Back-EMF constant [V/(rad/s)]. Rough estimate 0.916 for a mecanum drive moter.
         /// </summary>
-        [SerializeField] float backEmfConstant;
+        [SerializeField] [Tooltip("Back EMF constant [V/(rad/s)]")] public float BackEmfConstant;
+
+        /// <summary>
+        /// Back-EMF constant [V/(rad/s)]. Rough estimate 0.916 for a mecanum drive moter.
+        /// </summary>
+        [SerializeField] [Tooltip("Torque constant [Nm/A]")] public float TorqueConstant;
 
         public float Torque { get; private set; }
         public float Voltage;
@@ -71,11 +76,9 @@ namespace AWSIM
         public void Update()
         {
             // Calculate current
-            Current = (Voltage - backEmfConstant * Speed) / armatureResistance;
-            Torque = backEmfConstant * Current;
-            if (0 < Torque && 0 < Speed || 0 > Torque && 0 > Speed) {
-                Torque *= (1.0f - Speed/maximumSpeed);
-            }
+            Current = (Voltage - BackEmfConstant * Speed) / ArmatureResistance;
+            Torque = BackEmfConstant * Current;
+
             if (Torque < - maximumTorque) {
                 Torque = -maximumTorque;
             } else if (maximumTorque < Torque) {

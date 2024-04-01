@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -42,6 +43,8 @@ namespace AWSIM
         /// DC Motor
         /// </summary>
         public DCMotor dcMotor;
+    
+        public float acceleration;
 
         // latest wheel hit. This value updated according to the FixedUpdate() of the vehicle.
         WheelHit wheelHit;
@@ -73,24 +76,35 @@ namespace AWSIM
         // Coefficient for cancelling the skidding while stopping of the tire.
         float skiddingCancelRate;
 
+        // Flag to determine whether to use motor model 
+        //public bool useMotorModel = false;
+
+        // Last drive force
+        public Vector3 driveForce { get; private set; }
+
 
         void Reset()
         {
+            Debug.Log("TIME:" + Time.time + ", Label:" + label + " starting MecanumWHeel.Reset()..");
             // Initializes the value of WheelCollider.
             // Set WheelCollider's Friction to zero in order to apply our own tire force.
             // TODO: Implement the Editor extension to populate and initialize the Inspector.
-            wheelCollider = GetComponent<WheelCollider>();
+            //wheelCollider = GetComponent<WheelCollider>();
             wheelCollider.radius = 0.075f;
             wheelCollider.suspensionDistance = 0.2f;
+            Debug.Log("TIME:" + Time.time + ", Label:" + label + " exiting MecanumWHeel.Reset()..");
 
         }
 
         void Awake()
         {
+            Debug.Log("TIME:" + Time.time + ", Label:" + label + " starting MecanumWHeel.Awake()..");
             wheelCollider.ConfigureVehicleSubsteps(1000.0f, 1, 1);
             vehicleRigidbody = wheelCollider.attachedRigidbody;
-            Debug.Log("label:" + label + " vehicleRigidbody:" + vehicleRigidbody);
+            Debug.Log("TIME:" + Time.time + ", Label:" + label + " vehicleRigidbody:" + vehicleRigidbody);
             wheelCollider.motorTorque = 0.00001f;
+            acceleration = 0;
+            driveForce = Vector3.zero;
 
             rollerAxisAngle = rollerAxisAngleDeg * Mathf.PI / 180.0f;
             rollerRotationAxisLocal = new Vector3(Mathf.Cos(rollerAxisAngle), 0, -Mathf.Sin(rollerAxisAngle));
@@ -98,6 +112,7 @@ namespace AWSIM
             wheelForwardAxisLocal = new Vector3(0, 0, 1.0f);
             sinRollerAngle = Mathf.Sin(rollerAxisAngle);
             cosRollerAngle = Mathf.Cos(rollerAxisAngle);
+            Debug.Log("TIME:" + Time.time + ", Label:" + label + " exiting MecanumWHeel.Awake()..");
         }
 
         // for wheel rotation visual fields.
@@ -112,7 +127,7 @@ namespace AWSIM
                 //Debug.Log("Label:" + label + " MecanumWheel.FixedUpdate() is called.");
             }
 
-            qtWorldToVehicle = vehicleRigidbody.transform.rotation;
+            qtWorldToVehicle = transform.rotation; // vehicleRigidbody.transform.rotation;
             qtVehicleToWorld = Quaternion.Inverse(qtWorldToVehicle);
             qtRotAroundZAxisLocal = new Quaternion(0.0f, Mathf.Sin(rollerAxisAngle/2.0f), 0.0f, Mathf.Cos(rollerAxisAngle/2.0f));
 
@@ -192,14 +207,19 @@ namespace AWSIM
             // calculate wheel's linear velocity in world coordinate
             Vector3 wheelSpeed = 
                 vehicleRigidbody.velocity + 
-                 Vector3.Cross(vehicleRigidbody.angularVelocity, armFromCenter);
+                Vector3.Cross(vehicleRigidbody.angularVelocity, armFromCenter);
 
             // calculate wheel's linear velocity in wheel's coordinate
             Vector3 localWheelSpeed = transform.InverseTransformVector(wheelSpeed); 
 
             // calculate angular velocity of motor
             if (IsGrounded) {
-                dcMotor.SetSpeed(-Vector3.Dot(localWheelSpeed, rollerRotationAxisLocal) / sinRollerAngle / radius);
+                var wheelAxis = transform.TransformDirection(new Vector3(1.0f, 0, 0));
+                var rollerAxis = Mathf.Cos(rollerAxisAngle) * wheelAxis - Mathf.Sin(rollerAxisAngle) * wheelHit.forwardDir;
+
+                dcMotor.SetSpeed(-Vector3.Dot(wheelSpeed, rollerAxis) / sinRollerAngle / radius);
+
+                //dcMotor.SetSpeed(-Vector3.Dot(localWheelSpeed, rollerRotationAxisLocal) / sinRollerAngle / radius);
             } else {
                 dcMotor.SetSpeed(0.0f);
             }
@@ -215,9 +235,27 @@ namespace AWSIM
         }
 
         /// <summary>
+        /// Apply voltage to motor.
+        /// </summary>
+        public void SetMotorDuty(float duty)
+        {
+            dcMotor.SetDuty(duty);
+            dcMotor.Update();
+        }
+
+
+        /// <summary>
+        /// Apply voltage to motor.
+        /// </summary>
+        public void SetWheelAcceleration(float _acceleration)
+        {
+            acceleration = _acceleration;
+        }
+        
+        /// <summary>
         /// Apply the force that the tire outputs to the forward and sideway.
         /// </summary>
-        public void UpdateWheelForce(float acceleration)
+        public void UpdateWheelForce(/*float acceleration*/)
         {
             if (updateDispCnt == 0) {
                 //Debug.Log("Label:" + label + " Is wheel grounded?" + IsGrounded);
@@ -227,47 +265,51 @@ namespace AWSIM
                 if (acceleration != 0) {
                     Debug.Log("TIM:" + Time.time + ", Label:" + label + ", duty:" + acceleration + " (NOT GROUNDED)");
                 }
+                if (5 <= ++updateDispCnt) {
+                    updateDispCnt = 0;
+                }
                 return;
             }
-            if (updateDispCnt == 0) {
-                //Debug.Log("Wheel is grounded.");
-            }
 
-            qtWorldToVehicle = vehicleRigidbody.transform.rotation;
-            qtVehicleToWorld = Quaternion.Inverse(qtWorldToVehicle);
-            qtRotAroundZAxisLocal = new Quaternion(0.0f, Mathf.Sin(-rollerAxisAngle/2.0f), 0.0f, Mathf.Cos(-rollerAxisAngle/2.0f));
+            //var rollerAxis = transform.TransformVector(rollerRotationAxisLocal);    // from local to world
+            var wheelAxis = transform.TransformDirection(new Vector3(1.0f, 0, 0));
+            var rollerAxis = Mathf.Cos(rollerAxisAngle) * wheelAxis - Mathf.Sin(rollerAxisAngle) * wheelHit.forwardDir;
 
             // Apply drive force.
             // Apply a force that will result in the commanded acceleration.
-#if false
-            // Motor model occilates!!! 20240320 
-            // Update motor's state
-            dcMotor.SetDuty(acceleration);
-            dcMotor.Update();
-            // Calculate roller's axis in world coordinate
-            //var rollerAxis = vehicleRigidbody.transform.TransformVector(rollerRotationAxisLocal);
-            var rollerAxis = transform.TransformVector(rollerRotationAxisLocal);    // from local to world
-            //var rollerAxis = transform.InverseTransformVector(wheelHit.forwardDir);
-            //var rollerAxis = qtWorldToVehicle * qtRotAroundZAxisLocal * qtVehicleToWorld*  wheelHit.forwardDir;
-            // Calculate traction force in world coordinate
-            var driveForce = (- dcMotor.Torque / radius * rollerAxis / sinRollerAngle );    // 0.6: relaxation parameter
-            // Apply force
-            vehicleRigidbody.AddForceAtPosition(driveForce, wheelHit.point, ForceMode.Acceleration);
-            if (updateDispCnt == 0) {
-                Debug.Log("TIM:" + Time.time + ", Label:" + label + ", duty:" + acceleration + ", rollerAxis:" + rollerAxis + ", torque:" + dcMotor.Torque + ", driveForce:" + driveForce + ", speed:" + dcMotor.Speed + ", radius:" + radius);
-            }
-#else
-            var rollerAxis = transform.TransformVector(rollerRotationAxisLocal);    // from local to world
-            var driveForce = acceleration * rollerAxis; // ((qtWorldToVehicle * qtRotAroundZAxisLocal * qtVehicleToWorld) * wheelHit.forwardDir);
-            vehicleRigidbody.AddForceAtPosition(driveForce, wheelHit.point, ForceMode.Acceleration);
-            if (acceleration != 0) {
-                Debug.Log("TIM:" + Time.time + ", Label:" + label + ", acceleration:" + acceleration + ", wheelHit.forwardDir:" + wheelHit.forwardDir +
-                 ", driveForce:" + driveForce);
-            }
-#endif
+            if (!MecanumVehicle.ControlParam.useCmdVelFeedback) {       // Simulate motor dynamics
+                // Use backward discretization; motor model occilates when using forward discretization!!! 20240320 
+                //float inertia = 40.0f * radius*radius;
+                //float backwardDiscretizationCoeff = 1.0f +
+                //   dcMotor.BackEmfConstant*dcMotor.TorqueConstant/dcMotor.ArmatureResistance/inertia * Time.fixedDeltaTime;
+                float backwardDiscretizationCoeff = 1.0f;
 
-            updateDispCnt = updateDispCnt + 1;
-            if (50 <= updateDispCnt) {
+                // Calculate traction force in world coordinate
+                driveForce = (- dcMotor.Torque/backwardDiscretizationCoeff / radius * rollerAxis / sinRollerAngle );    // 0.6: relaxation parameter
+
+                // Apply force
+                vehicleRigidbody.AddForceAtPosition(driveForce, wheelHit.point, ForceMode.Acceleration);
+                if (updateDispCnt == 0) {
+                    var localDriveForce = transform.InverseTransformVector(driveForce); 
+                    Debug.Log("fixedDeltaTime:" + Time.fixedDeltaTime + ", backwardDiscretizationCoeff-1:" + (backwardDiscretizationCoeff-1.0f));
+                    Debug.Log("TIM:" + Time.time + ", Label:" + label + ", duty:" + dcMotor.Voltage/dcMotor.MaximumVoltage
+                                 + ", torque:" + dcMotor.Torque + ", driveForce:" + driveForce + ", localDriveForce:" + localDriveForce + ", speed:" + dcMotor.Speed);
+                }
+            } else {
+                // Use PI controller for CmdVel
+                driveForce = acceleration * rollerAxis; // ((qtWorldToVehicle * qtRotAroundZAxisLocal * qtVehicleToWorld) * wheelHit.forwardDir);
+                vehicleRigidbody.AddForceAtPosition(driveForce, wheelHit.point, ForceMode.Acceleration);
+                if (updateDispCnt == 0) {
+                    var localDriveForce = transform.InverseTransformVector(driveForce); 
+                    Debug.Log("TIM:" + Time.time + ", Label:" + label + ", acceleration:" + acceleration
+                                 + ", wheelHit.forwardDir:" + wheelHit.forwardDir + ", driveForce:" + driveForce
+                                 + ", localDriveForce:" + localDriveForce + ", speed:" + dcMotor.Speed);
+                }
+            }
+            //Debug.Log("Label:" + label + ",rollerAxis:" + rollerAxis + ",forwardDir:" + /*wheelVisualTransform.InverseTransformVector(*/wheelHit.forwardDir);
+             
+
+            if (5 <= ++updateDispCnt) {
                 updateDispCnt = 0;
             }
 
@@ -290,5 +332,8 @@ namespace AWSIM
             }
 */
         }
+
+
     }
+
 }

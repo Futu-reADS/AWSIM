@@ -52,6 +52,7 @@ namespace AWSIM
 
         void Awake()
         {
+            Debug.Log("TIME:" + Time.time + "Vehicle.Awake() is called");
             wheelCollider.ConfigureVehicleSubsteps(1000.0f, 1, 1);
             vehicleRigidbody = wheelCollider.attachedRigidbody;
             wheelCollider.motorTorque = 0.00001f;
