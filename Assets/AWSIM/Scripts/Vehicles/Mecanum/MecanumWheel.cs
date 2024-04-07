@@ -289,7 +289,7 @@ namespace AWSIM
 
                 // Apply force
                 vehicleRigidbody.AddForceAtPosition(driveForce, wheelHit.point, ForceMode.Acceleration);
-                if (updateDispCnt == 0) {
+                if (false /*updateDispCnt == 0*/) {
                     var localDriveForce = transform.InverseTransformVector(driveForce); 
                     Debug.Log("fixedDeltaTime:" + Time.fixedDeltaTime + ", backwardDiscretizationCoeff-1:" + (backwardDiscretizationCoeff-1.0f));
                     Debug.Log("TIM:" + Time.time + ", Label:" + label + ", duty:" + dcMotor.Voltage/dcMotor.MaximumVoltage

@@ -12,12 +12,15 @@ namespace AWSIM
     [RequireComponent(typeof(DCMotor))]
     public class DCMotorRosInput : MonoBehaviour
     {
-        [SerializeField] string dutyRatioTopic = "/dcmotor/duty_ratio";
-        [SerializeField] QoSSettings qosSettings = new QoSSettings();
         [SerializeField] DCMotor dcMotor;
+        [SerializeField] string dutyRatioTopic = "/dcmotor/duty_ratio";
+        [SerializeField] string positionTopic = "/dcmotor/position";
+        [SerializeField] QoSSettings qosSettings = new QoSSettings();
 
         // subscribers.
-        ISubscription<std_msgs.msg.Float64> dutyRatioSubscriber;
+        ISubscription<std_msgs.msg.Float32> dutyRatioSubscriber;
+
+        IPublisher<std_msgs.msg.Float32> positionPublisher;
 
        void Reset()
         {
@@ -38,12 +41,21 @@ namespace AWSIM
             dcMotor.Voltage = 0;
 
             dutyRatioSubscriber
-                = SimulatorROS2Node.CreateSubscription<std_msgs.msg.Float64>(
+                = SimulatorROS2Node.CreateSubscription<std_msgs.msg.Float32>(
                     dutyRatioTopic, msg =>
                     {
-                        dcMotor.Voltage =  Convert.ToSingle(msg) * dcMotor.MaximumVoltage;
+                        dcMotor.Voltage =  Convert.ToSingle(msg.Data) * dcMotor.MaximumVoltage;
                         Debug.Log("dcMotor.speed:"+dcMotor.Speed);
                     });
+
+            positionPublisher = SimulatorROS2Node.CreatePublisher<std_msgs.msg.Float32>(positionTopic);
+        }
+
+        void Update()
+        {
+            std_msgs.msg.Float32 msg = new std_msgs.msg.Float32();
+            msg.Data = dcMotor.getPosition();
+            positionPublisher.Publish(msg);
         }
        
 

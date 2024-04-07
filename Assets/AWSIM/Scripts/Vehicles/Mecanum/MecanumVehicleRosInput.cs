@@ -20,6 +20,9 @@ namespace AWSIM
         [SerializeField] string gearCommandTopic = "/control/command/gear_cmd";
         */
         [SerializeField] string vehicleEmergencyStampedTopic = "/control/command/emergency_cmd";
+
+        [SerializeField] bool UseCmdVelTopic = false;
+
         [SerializeField] string cmdVelTopic = "/cmd_vel";
 
         [SerializeField] QoSSettings qosSettings = new QoSSettings();
@@ -129,12 +132,16 @@ namespace AWSIM
                 = SimulatorROS2Node.CreateSubscription<geometry_msgs.msg.Twist>(
                     cmdVelTopic, msg =>
                     {
+                        vehicle.UseCmdVel = UseCmdVelTopic;
+                        if (!UseCmdVelTopic) {
+                            return;
+                        }
                         // highest priority is EMERGENCY.
                         // If emergency is true, emergencyDeceleration is applied to the vehicle's deceleration.
                         vehicle.CmdVel.Linear.x = Convert.ToSingle(msg.Linear.X);
                         vehicle.CmdVel.Linear.y = Convert.ToSingle(msg.Linear.Y);
                         vehicle.CmdVel.Angular = Convert.ToSingle(msg.Angular.Z);
-                        Debug.Log("/cmd_vel:("+vehicle.CmdVel.Linear.x+", "+vehicle.CmdVel.Linear.y+", "+vehicle.CmdVel.Angular+")");
+                        //DebugLog("/cmd_vel:("+vehicle.CmdVel.Linear.x+", "+vehicle.CmdVel.Linear.y+", "+vehicle.CmdVel.Angular+")");
 
                     });
 

@@ -61,7 +61,7 @@ namespace AWSIM
     // - wheel radius (m)                               : Wheel settings
 
     // TODO: Write detailed documentation about the vehicle.
-    public class MecanumVehicle : MonoBehaviour
+    public class MecanumVehicleWithRotorSim : MonoBehaviour
     {
         public enum Shift
         {
@@ -260,8 +260,6 @@ namespace AWSIM
 
         public Twist2D CmdVel;
 
-        public bool UseCmdVel = false;
-
         private float sleepTimer = 0.0f; ///Count the time until CanSleep is switched to true
 
         Twist2D estimatedVel;
@@ -292,7 +290,7 @@ namespace AWSIM
             m_transform = transform;
             Debug.Log("TIME:" + Time.time + "MecanumVehicles.Awake() is called");
 
-            wheels = new MecanumWheel[] { frontAxle.LeftWheel, frontAxle.RightWheel, rearAxle.LeftWheel, rearAxle.RightWheel };
+            //wheels = new MecanumWheel[] { frontAxle.LeftWheel, frontAxle.RightWheel, rearAxle.LeftWheel, rearAxle.RightWheel };
             CmdVel = new Twist2D();
             estimatedVel = new Twist2D();
             integDiffVel = new Twist2D();
@@ -321,7 +319,7 @@ namespace AWSIM
             ComputeVehicleState();
 
             // Update Steering, WheelHit, CancelForceRate of the wheel.
-            PreUpdateWheels();
+            //PreUpdateWheels();
 
             // Sleep ?
             var sleep = CanSleep();
@@ -368,20 +366,6 @@ namespace AWSIM
 
                 // Angular velocity.
                 AngularVelocity = ((transform.rotation.eulerAngles - lastRotation.eulerAngles) / Time.deltaTime) * Mathf.Deg2Rad;
-            }
-
-            void PreUpdateWheels()
-            {
-                // Steer angle is front-only.
-                //frontAxle.LeftWheel.UpdateWheelSteerAngle(SteerAngle);
-                //fronMecanumVehicle.USE_MOTOR_DYNAMICStAxle.RightWheel.UpdateWheelSteerAngle(SteerAngle);
-
-                foreach (var wheel in wheels)
-                {
-                    wheel.UpdateWheelHit();
-                    //wheel.UpdateSkiddingCancelRate(SkiddingCancelRate);
-                }
-
             }
 
             bool CanSleep()
@@ -463,43 +447,14 @@ namespace AWSIM
 
             void UpdateWheelsForce()
             {
-                if (!UseCmdVel) {
-                    return;
-                }
-
-                if (ControlParam.useCmdVelFeedback) {
-                    CalculateAccelByFeedback();
-                } else {
-                    ComputeInverseKinematic(wheelAcceleration, CmdVel);    // open loop control
-                    Debug.Log("CmdVel[ "+CmdVel.Linear.x+", " + CmdVel.Linear.y+", "+CmdVel.Angular+" ]");
-                }
-
+                ComputeInverseKinematic(wheelAcceleration, CmdVel);    // open loop control
                 int idx;
                 for (idx=0; idx < wheels.Length; idx++) {
-                    wheels[idx].UpdateSpeed();
+                    wheels[idx].SetMotorDuty(wheelAcceleration[idx]);
                 }
-                for (idx=0; idx < wheels.Length; idx++) {
-                    if (ControlParam.useCmdVelFeedback) {
-                        wheels[idx].SetWheelAcceleration(wheelAcceleration[idx]);
-                    } else {
-                        wheels[idx].SetMotorDuty(wheelAcceleration[idx]);
-                    }
-                    wheels[idx].UpdateWheelForce();
-                }
-                Debug.Log("TIME:" + Time.time + ", wheelForce," +
-                    wheels[0].acceleration    + "," + wheels[1].acceleration    + "," + wheels[2].acceleration    + "," + wheels[3].acceleration + ", wheelSpeed," +
-                    wheels[0].dcMotor.Speed + "," + wheels[1].dcMotor.Speed + "," + wheels[2].dcMotor.Speed + "," + wheels[3].dcMotor.Speed);
-            }
-
-            void CalculateAccelByFeedback() {
-                EstimateVelocity();
-                var diffVel = new Twist2D();
-                var acceleration = new Twist2D();
-                diffVel = CmdVel - estimatedVel;
-                //Debug.Log("diffVel[ "+diffVel.Linear.x+", " + diffVel.Linear.y+", "+diffVel.Angular+" ]");
-                integDiffVel = integDiffVel + Time.deltaTime * diffVel;
-                acceleration = controlParam.Kp * diffVel + controlParam.Ki * integDiffVel;
-                ComputeInverseKinematic(wheelAcceleration, acceleration); 
+                //Debug.Log("TIME:" + Time.time + ", wheelForce," +
+                //    wheels[0].acceleration    + "," + wheels[1].acceleration    + "," + wheels[2].acceleration    + "," + wheels[3].acceleration + ", wheelSpeed," +
+                //    wheels[0].dcMotor.Speed + "," + wheels[1].dcMotor.Speed + "," + wheels[2].dcMotor.Speed + "," + wheels[3].dcMotor.Speed);
             }
 
             void ComputeInverseKinematic(float[] perWheelData, Twist2D t) {
@@ -509,21 +464,6 @@ namespace AWSIM
                 perWheelData[2] = ((t.Linear.x + t.Linear.y - t.Angular*controlParam.wheelGeometry())/controlParam.wheelRadius)/controlParam.c;
                 perWheelData[3] = ((t.Linear.x - t.Linear.y + t.Angular*controlParam.wheelGeometry())/controlParam.wheelRadius)/controlParam.c;
             } 
-
-            void EstimateVelocity() {
-                var linear = ROS2Utility.UnityToRosPosition(LocalVelocity);
-                estimatedVel.Linear.x = linear.x;
-                estimatedVel.Linear.y = linear.y;
-                estimatedVel.Angular = ROS2Utility.UnityToRosPosition(-AngularVelocity).z;
-                
-                if (EstimateVelocityDispCnt == 0) {
-                    // Debug.Log("estimatedVel:("+estimatedVel.Linear.x+", "+estimatedVel.Linear.y+", "+linear.z+", "+estimatedVel.Angular+")");;
-                }
-                if (++EstimateVelocityDispCnt >= 100) {
-                    EstimateVelocityDispCnt = 0;
-                }
-
-            }
 
         }
     }
