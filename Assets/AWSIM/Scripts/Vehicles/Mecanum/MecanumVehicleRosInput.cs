@@ -21,7 +21,7 @@ namespace AWSIM
         */
         [SerializeField] string vehicleEmergencyStampedTopic = "/control/command/emergency_cmd";
 
-        [SerializeField] bool UseCmdVelTopic = false;
+        [SerializeField] bool UseCmdVelTopic = true;
 
         [SerializeField] string cmdVelTopic = "/cmd_vel";
 
@@ -128,6 +128,7 @@ namespace AWSIM
                             vehicle.AccelerationInput = emergencyDeceleration;
                     });
 
+/*
             cmdVelSubscriber
                 = SimulatorROS2Node.CreateSubscription<geometry_msgs.msg.Twist>(
                     cmdVelTopic, msg =>
@@ -144,6 +145,7 @@ namespace AWSIM
                         //DebugLog("/cmd_vel:("+vehicle.CmdVel.Linear.x+", "+vehicle.CmdVel.Linear.y+", "+vehicle.CmdVel.Angular+")");
 
                     });
+*/
 
         }
 

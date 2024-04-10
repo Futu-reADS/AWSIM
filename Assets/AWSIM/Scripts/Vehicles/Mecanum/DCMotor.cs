@@ -51,16 +51,16 @@ namespace AWSIM
 
         double timestamp_last;
 
-         float deltaTime;
         float speedLpfTimeConst;
+        string label;
         
+        int countDisp = 0;
 
         void Reset()
         {
             Current = 0;
             Torque = 0;
             timestamp_last = 0;
-            deltaTime = 0.01f;
             speedLpfTimeConst = 0.01f;
         }
 
@@ -69,11 +69,12 @@ namespace AWSIM
             Current = 0;
             Torque = 0;
             timestamp_last = 0;
-            deltaTime = 0.01f;
             speedLpfTimeConst = 0.01f;
+
+            countDisp = 0;
         }
 
-        public void Update()
+        public void FixedUpdate()
         {
             // Calculate current
             Current = (Voltage - BackEmfConstant * Speed) / ArmatureResistance;
@@ -90,6 +91,18 @@ namespace AWSIM
                 Position += Convert.ToSingle(Speed * (timestamp_now - timestamp_last)*90/Mathf.PI);
                 timestamp_last = timestamp_now;
             }
+            if (countDisp == 0) {
+                Debug.Log(string.Format("[{0}] Voltage:{1}", label, Voltage));
+            }
+            if (100 <= ++countDisp) {
+                countDisp = 0;
+            }
+        }
+        public void SetLabel(string _label) {
+            label = _label;
+        }
+        public string GetLabel() {
+            return label;
         }
 
         public void SetSpeed(float _speed) {
@@ -98,7 +111,7 @@ namespace AWSIM
             } else if (maximumSpeed < _speed) {
                 _speed = maximumSpeed;
             }
-            Speed = (1-deltaTime / speedLpfTimeConst) * Speed + deltaTime / speedLpfTimeConst * _speed;
+            Speed = (1-Time.fixedDeltaTime / speedLpfTimeConst) * Speed + Time.fixedDeltaTime / speedLpfTimeConst * _speed;
         }
 
         public void SetDuty(float _duty) {
@@ -108,15 +121,20 @@ namespace AWSIM
                 _duty = 1.0f;
             }
             Voltage = _duty * MaximumVoltage;
+            Debug.Log(string.Format("[{0}] dcMotor.SetDuty({1}) is called.", label, _duty));
+        }
+        public float GetDuty() {
+            return Voltage / MaximumVoltage;
         }
 
         /// <summary>
         /// setTargetVelocity - Set velocity of motor (stab for Phidget API)
         /// </summary>
-        public void SetTargetVelocity(float _velocity)
-        {
-            Voltage = MaximumVoltage * _velocity;
-        }
+        //public void SetTargetVelocity(float _velocity)
+        //{
+        //    Voltage = MaximumVoltage * _velocity;
+        //    Debug.Log("");
+        //}
 
         /// <summary>
         /// getPosition - Get axial angle of motor (stab for Phidget API)

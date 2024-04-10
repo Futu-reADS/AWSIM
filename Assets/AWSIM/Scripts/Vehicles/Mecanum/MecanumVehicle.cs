@@ -260,7 +260,7 @@ namespace AWSIM
 
         public Twist2D CmdVel;
 
-        public bool UseCmdVel = false;
+        [HideInInspector] public bool UseCmdVel = false;
 
         private float sleepTimer = 0.0f; ///Count the time until CanSleep is switched to true
 
@@ -338,7 +338,7 @@ namespace AWSIM
                 UpdateWheelsForce(); // Convert.ToSingle(acceleration));
             }
 
-            // cache value for next frame.
+            // cache valpdatee for next frame.
             lastVelocity = m_rigidbody.velocity;
             lastPosition = m_transform.position;
             lastRotation = m_transform.rotation;
@@ -386,6 +386,7 @@ namespace AWSIM
 
             bool CanSleep()
             {
+                return false;
                 //return false;
                 if (IsCanSleepVelocity() && IsCanSleepInput()) {
                     sleepTimer += Time.deltaTime;
@@ -413,11 +414,23 @@ namespace AWSIM
                 // Is input gear & acceleration can sleep ?
                 bool IsCanSleepInput()
                 {
-                    if (CmdVel.Linear.x == 0 && CmdVel.Linear.y == 0 && CmdVel.Angular == 0) {
-                        return true;
+                    int idx;
+
+                    if (UseCmdVel) {
+                        if (CmdVel.Linear.x == 0 && CmdVel.Linear.y == 0 && CmdVel.Angular == 0) {
+                            return true;
+                        }
+                        return false;
+                    } else {
+                        for (idx=0; idx < wheels.Length; idx++) {
+                            if (wheels[idx].dcMotor.Voltage != 0) {
+                                return false;
+                            }
+                        }
                     }
-                    return false;
+                    return true;
                 }
+
             }
 
             void UpdateVehicleSleep(bool isSleep)
@@ -463,13 +476,9 @@ namespace AWSIM
 
             void UpdateWheelsForce()
             {
-                if (!UseCmdVel) {
-                    return;
-                }
-
                 if (ControlParam.useCmdVelFeedback) {
                     CalculateAccelByFeedback();
-                } else {
+                } else if (UseCmdVel) {
                     ComputeInverseKinematic(wheelAcceleration, CmdVel);    // open loop control
                     Debug.Log("CmdVel[ "+CmdVel.Linear.x+", " + CmdVel.Linear.y+", "+CmdVel.Angular+" ]");
                 }
@@ -481,14 +490,16 @@ namespace AWSIM
                 for (idx=0; idx < wheels.Length; idx++) {
                     if (ControlParam.useCmdVelFeedback) {
                         wheels[idx].SetWheelAcceleration(wheelAcceleration[idx]);
-                    } else {
+                    } else if (UseCmdVel) {
                         wheels[idx].SetMotorDuty(wheelAcceleration[idx]);
                     }
                     wheels[idx].UpdateWheelForce();
                 }
-                Debug.Log("TIME:" + Time.time + ", wheelForce," +
+                if (false) {
+                    Debug.Log("TIME:" + Time.time + ", wheelForce," +
                     wheels[0].acceleration    + "," + wheels[1].acceleration    + "," + wheels[2].acceleration    + "," + wheels[3].acceleration + ", wheelSpeed," +
                     wheels[0].dcMotor.Speed + "," + wheels[1].dcMotor.Speed + "," + wheels[2].dcMotor.Speed + "," + wheels[3].dcMotor.Speed);
+                }
             }
 
             void CalculateAccelByFeedback() {
@@ -504,10 +515,10 @@ namespace AWSIM
 
             void ComputeInverseKinematic(float[] perWheelData, Twist2D t) {
                 // FL, FR, RL, RR
-                perWheelData[0] = ((t.Linear.x - t.Linear.y - t.Angular*controlParam.wheelGeometry())/controlParam.wheelRadius)/controlParam.c;
-                perWheelData[1] = ((t.Linear.x + t.Linear.y + t.Angular*controlParam.wheelGeometry())/controlParam.wheelRadius)/controlParam.c;
-                perWheelData[2] = ((t.Linear.x + t.Linear.y - t.Angular*controlParam.wheelGeometry())/controlParam.wheelRadius)/controlParam.c;
-                perWheelData[3] = ((t.Linear.x - t.Linear.y + t.Angular*controlParam.wheelGeometry())/controlParam.wheelRadius)/controlParam.c;
+                perWheelData[0] =  ((t.Linear.x - t.Linear.y - t.Angular*controlParam.wheelGeometry())/controlParam.wheelRadius)/controlParam.c;
+                perWheelData[1] = -((t.Linear.x + t.Linear.y + t.Angular*controlParam.wheelGeometry())/controlParam.wheelRadius)/controlParam.c;
+                perWheelData[2] =  ((t.Linear.x + t.Linear.y - t.Angular*controlParam.wheelGeometry())/controlParam.wheelRadius)/controlParam.c;
+                perWheelData[3] = -((t.Linear.x - t.Linear.y + t.Angular*controlParam.wheelGeometry())/controlParam.wheelRadius)/controlParam.c;
             } 
 
             void EstimateVelocity() {

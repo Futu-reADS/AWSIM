@@ -44,8 +44,8 @@ namespace AWSIM
                 = SimulatorROS2Node.CreateSubscription<std_msgs.msg.Float32>(
                     dutyRatioTopic, msg =>
                     {
-                        dcMotor.Voltage =  Convert.ToSingle(msg.Data) * dcMotor.MaximumVoltage;
-                        Debug.Log("dcMotor.speed:"+dcMotor.Speed);
+                        dcMotor.SetDuty(Convert.ToSingle(msg.Data));
+                        //Debug.Log(string.Format("dcMotor({0}) voltage:{1} speed:{2}", dcMotor.GetLabel(), dcMotor.Voltage, dcMotor.Speed));
                     });
 
             positionPublisher = SimulatorROS2Node.CreatePublisher<std_msgs.msg.Float32>(positionTopic);
