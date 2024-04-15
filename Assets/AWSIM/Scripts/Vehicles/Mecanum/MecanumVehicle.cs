@@ -537,5 +537,10 @@ namespace AWSIM
             }
 
         }
+        public void SubscribeCmdVel(bool _select) {
+            UseCmdVel = _select;
+
+        }
+
     }
 }

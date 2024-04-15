@@ -21,6 +21,9 @@ namespace AWSIM
         [SerializeField]
         MecanumWheel mecanumWheelRR;
 
+        [SerializeField]
+        MecanumVehicle mecanumVehicle;
+
         // Start is called before the first FRame update
         void Start()
         {
@@ -35,6 +38,15 @@ namespace AWSIM
                 mecanumWheelFL.GetMotorDuty()*100, mecanumWheelFR.GetMotorDuty()*100, mecanumWheelRL.GetMotorDuty()*100, mecanumWheelRR.GetMotorDuty()*100);
             angularVelocityText.text = string.Format("MecWl.Spd[rad/s]\r\n{0,3:+#0.00#;-#0.00#} {1,3:+#0.00#;-#0.00#}\r\n{2,3:+#0.00#;-#0.00#} {3,3:+#0.00#;-#0.00#}", 
                 mecanumWheelFL.GetAngularSpeed(), mecanumWheelFR.GetAngularSpeed(), mecanumWheelRL.GetAngularSpeed(), mecanumWheelRR.GetAngularSpeed());
+        }
+
+        [SerializeField]
+        public void OnClickSubscribeCmdVel(bool _select) {
+            mecanumVehicle.SubscribeCmdVel(_select);
+        }
+        [SerializeField]
+        public void OnClickSubscribeDutyRatio(bool _select) {
+            mecanumVehicle.SubscribeCmdVel(!_select);
         }
     }
 }
