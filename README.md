@@ -47,30 +47,28 @@ A mecanum wheelchair simulator that subscribes tocpis for each motor `/wheel_XX/
 
   - Prepare mecanum_drive_sim on your computer, if not
 
-~~~
-    $ git clone git@github.com:Futu-reADS/mecanum_drive_sim.git
-    $ cd mecanum_drive_sim
-    $ colcon build --symlink-install
-~~~
+    ```git clone git@github.com:Futu-reADS/mecanum_drive_sim.git
+    cd mecanum_drive_sim
+    colcon build --symlink-install
+    ```
 
   - Run mecanum_drive_sim
 
-~~~
     (inside directory for mecanum_drive_sim)
-    $ . install/setup.bash
-    $ ros2 run mecanum_drive_sim phidgets_control_sim
-~~~
+
+    ```. install/setup.bash
+    ros2 run mecanum_drive_sim phidgets_control_sim
+    ```
 
  
 - Run FT_MecanumSimulation stored inside AWSIM on Unity
 
     - Prepare AWSIM if not
 
-~~~
-    $ git clone git@github.com:Futu-reADS/AWSIM.git  # this takes several minutes
-    $ git checkout ft_mecanum
-    $ git pull
-~~~
+    ```git clone git@github.com:Futu-reADS/AWSIM.git  # this takes several minutes
+    git checkout ft_mecanum
+    git pull
+    ```
 
     - Run Unity Hub
 
