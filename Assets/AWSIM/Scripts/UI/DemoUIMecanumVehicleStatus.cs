@@ -24,6 +24,12 @@ namespace AWSIM
         [SerializeField]
         MecanumVehicle mecanumVehicle;
 
+        [SerializeField]
+        Text wheelChairWeightText;
+
+        [SerializeField]
+        Rigidbody wheelChairRigidbody;
+
         // Start is called before the first FRame update
         void Start()
         {
@@ -47,6 +53,12 @@ namespace AWSIM
         [SerializeField]
         public void OnClickSubscribeDutyRatio(bool _select) {
             mecanumVehicle.SubscribeCmdVel(!_select);
+        }
+
+        public void SetWheelChairWeight(float _weight) {
+            //Debug.Log(string.Format("SetWheelChairWeight({0})", _weight));
+            //wheelChairRigid.SetMass(_weight);
+            wheelChairWeightText.text = string.Format("{0}kg", _weight);
         }
     }
 }
