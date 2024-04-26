@@ -39,7 +39,9 @@ See also [LICENSE](./LICENSE)
 
 A mecanum wheelchair simulator is added to this branch of AWSIM.
 - Scene file: `Assets/AWSIM/Scenes/Main/FT_MecanumSimulation.unity`
-
+- 3-way display of a mecanum vehicle:  perspective at the bottom, isometric side-view at the top-right and isometric top-view at the top-left.
+- Vehicle's longitudina velocity, latitudinal velocity and angular velocity are displayed.
+- Duty ratio given to each motor as well as speed of each motor are displayed.
 
 ![Mecanum Wheel Chair Simulated](</README_img/README_MecanumVehicleSimView.png>)
 
