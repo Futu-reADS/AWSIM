@@ -74,11 +74,11 @@ A mecanum wheelchair simulator is added to this branch of AWSIM.
     git pull
     ```
 
-    - Run Unity Hub
-    - Run AWSIM
-    - Open `Asset/AWSIM/Scenes/
+    - Start Unity Hub
+    - Double click AWSIM
+    - Open `Asset/AWSIM/Scenes/FT_MecanumSimulation.unity{
     - Start simulation using _playback_ button at the top of Unity's window
-    - Preparing an executable file for the simulator
+    - Preparing an executable file for the simulator is a good idea for reducing load
 
 
 ### Topics
