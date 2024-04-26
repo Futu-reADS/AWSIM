@@ -37,13 +37,16 @@ See also [LICENSE](./LICENSE)
 
 ## Mecanum Wheelchair Support
 
-A mecanum wheelchair simulator that subscribes tocpis for each motor `/wheel_XX/dcmotor/duty_ratio` (`XX`: wheel label (`fl`, `fr`, `rl` or `rr`).
+A mecanum wheelchair simulator is added to this branch of AWSIM.
+- Scene file: `Assets/AWSIM/Scenes/Main/FT_MecanumSimulation.unity`
+
 
 ![Mecanum Wheel Chair Simulated](</README_img/README_MecanumVehicleSimView.png>)
 
-### How to Use Mecanum Simulator
 
-- Run ]mecanum_drive_sim](https://github.com/Futu-reADS/mecanum_drive_sim.git), a stub for mecanum_drive
+### How to Use Mecanum Simulator 
+
+- Run [mecanum_drive_sim](https://github.com/Futu-reADS/mecanum_drive_sim.git), a stub for `mecanum_drive` package that translate `/cmd_vel` into duty ratio commands to four motors.
 
   - Prepare mecanum_drive_sim on your computer, if not
 
@@ -59,7 +62,6 @@ A mecanum wheelchair simulator that subscribes tocpis for each motor `/wheel_XX/
     ```. install/setup.bash
     ros2 run mecanum_drive_sim phidgets_control_sim
     ```
-
  
 - Run FT_MecanumSimulation stored inside AWSIM on Unity
 
@@ -71,6 +73,26 @@ A mecanum wheelchair simulator that subscribes tocpis for each motor `/wheel_XX/
     ```
 
     - Run Unity Hub
+    - Run AWSIM
+    - Open `Asset/AWSIM/Scenes/
+    - Start simulation using _playback_ button at the top of Unity's window
+    - Preparing an executable file for the simulator
+
+
+### Topics
+
+#### Subscriptions
+
+- `/wheel_XX/dcmotor/duty_ratio` (`XX`: wheel label (`fl`, `fr`, `rl` or `rr`))
+    - Corresponds to setTargetVelocity() in Phidgets API
+
+Conversion from `/cmd_vel` to `/wheel_XX/dcmotor/duty_ratio` is done by [`meanum_drive_sim`](https://github.com/Futu-reADS/mecanum_drive_sim.git).
+
+#### Publishes
+
+- `/sensing/lidar/point_cloud_ex` (topic type: `sensor_msgs/msg/PointCloud2`)
+    - Point cloud data from the 3D LiDAR in simulator
+
 
 
 ## Contact
