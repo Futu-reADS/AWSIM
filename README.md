@@ -37,13 +37,43 @@ See also [LICENSE](./LICENSE)
 
 ## Mecanum Wheelchair Support
 
-A mecanum wheelchair simulator that subscribes /cmd_vel, does inverse kinematic calculation internally and gives corresponding torque to each mecanum wheel.
+A mecanum wheelchair simulator that subscribes tocpis for each motor `/wheel_XX/dcmotor/duty_ratio` (`XX`: wheel label (`fl`, `fr`, `rl` or `rr`).
 
-![Mecanum Wheel Chair in Simulated environment](<README_MecanumWheelChairSim.png>)
+![Mecanum Wheel Chair Simulated](</README_img/README_MecanumVehicleSimView.png>)
 
-Side view of the mecanum wheelchair:
+### How to Use Mecanum Simulator
 
-![Side View](<README_MecanumWheelChairSideView.png>)
+- Run ]mecanum_drive_sim](https://github.com/Futu-reADS/mecanum_drive_sim.git), a stub for mecanum_drive
+
+  - Prepare mecanum_drive_sim on your computer, if not
+
+~~~
+    $ git clone git@github.com:Futu-reADS/mecanum_drive_sim.git
+    $ cd mecanum_drive_sim
+    $ colcon build --symlink-install
+~~~
+
+  - Run mecanum_drive_sim
+
+~~~
+    (inside directory for mecanum_drive_sim)
+    $ . install/setup.bash
+    $ ros2 run mecanum_drive_sim phidgets_control_sim
+~~~
+
+ 
+- Run FT_MecanumSimulation stored inside AWSIM on Unity
+
+    - Prepare AWSIM if not
+
+~~~
+    $ git clone git@github.com:Futu-reADS/AWSIM.git  # this takes several minutes
+    $ git checkout ft_mecanum
+    $ git pull
+~~~
+
+    - Run Unity Hub
+
 
 ## Contact
 
