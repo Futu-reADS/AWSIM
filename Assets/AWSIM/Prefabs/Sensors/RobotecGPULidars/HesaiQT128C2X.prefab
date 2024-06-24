@@ -47,19 +47,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87ba9656cbd67467f8119d8666b098aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pcl24Topic: lidar/pointcloud
-  pcl48Topic: lidar/pointcloud_ex
-  instanceIdTopic: lidar/instance_id
-  radarTopic: radar/pointcloud
-  frameID: world
-  publishPCL24: 1
-  publishPCL48: 1
-  publishInstanceId: 0
-  publishRadar: 0
-  reliabilityPolicy: 2
-  durabilityPolicy: 2
-  historyPolicy: 1
-  historyDepth: 5
+  frameId: world
+  qos:
+    reliabilityPolicy: 2
+    durabilityPolicy: 2
+    historyPolicy: 1
+    historyDepth: 5
+  pointCloud2Publishers:
+  - topic: lidar/pointcloud
+    publish: 1
+    fieldsPreset: 0
+    fields: 0100000002040000020000000a00000001040000
+  - topic: lidar/pointcloud_ex
+    publish: 1
+    fieldsPreset: 1
+    fields: 0100000002040000020000000a0000000104000008000000070000000b0000000004000001040000020400000c000000
+  radarScanPublishers: []
 --- !u!114 &1429064023790827067
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -98,19 +101,30 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AutomaticCaptureHz: 10
   modelPreset: 10
+  returnType: 0
   applyDistanceGaussianNoise: 1
   applyAngularGaussianNoise: 1
   applyVelocityDistortion: 0
+  doValidateConfigurationOnStartup: 1
   configuration:
     id: 0
+  outputRestriction:
+    applyRestriction: 0
+    rectangularRestrictionMasks: []
+    enablePeriodicRestriction: 0
+    restrictionPeriod: 1
+    restrictionDutyRate: 0.5
+    enableRestrictionRandomizer: 0
+    minRandomPerdiod: 0
+    maxRandomPerdiod: 1
   references:
     version: 1
     00000000:
-      type: {class: HesaiQT128C2XLidarConfiguration, ns: RGLUnityPlugin, asm: Assembly-CSharp}
+      type: {class: HesaiQT128C2XLidarConfiguration, ns: RGLUnityPlugin, asm: AWSIM}
       data:
         _laserArray:
           centerOfMeasurementLinearOffsetMm: {x: 0, y: 58.2, z: 0}
-          focalDistanceMm: 0
+          focalDistanceMm: 35.4
           lasers:
           - horizontalAngularOffsetDeg: -6.2169952
             verticalAngularOffsetDeg: 18.331392
@@ -1460,7 +1474,8 @@ MonoBehaviour:
         minHAngle: 0
         maxHAngle: 360
         laserArrayCycleTime: 0.11111
-        beamDivergence: 0.13
+        horizontalBeamDivergence: 0.13
+        verticalBeamDivergence: 0.13
         noiseParams:
           angularNoiseType: 0
           angularNoiseStDev: 0.057295784
@@ -1512,7 +1527,7 @@ MeshCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 4
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 7575894368967399662, guid: 78358958c5435da8d91e6505fd539ae8, type: 3}
 --- !u!33 &2053324970439585755

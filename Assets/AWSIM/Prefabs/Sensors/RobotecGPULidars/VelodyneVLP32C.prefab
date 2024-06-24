@@ -47,19 +47,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87ba9656cbd67467f8119d8666b098aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pcl24Topic: lidar/pointcloud
-  pcl48Topic: lidar/pointcloud_ex
-  instanceIdTopic: lidar/instance_id
-  radarTopic: radar/pointcloud
-  frameID: world
-  publishPCL24: 1
-  publishPCL48: 1
-  publishInstanceId: 0
-  publishRadar: 0
-  reliabilityPolicy: 2
-  durabilityPolicy: 2
-  historyPolicy: 1
-  historyDepth: 5
+  frameId: world
+  qos:
+    reliabilityPolicy: 2
+    durabilityPolicy: 2
+    historyPolicy: 1
+    historyDepth: 5
+  pointCloud2Publishers:
+  - topic: lidar/pointcloud
+    publish: 1
+    fieldsPreset: 0
+    fields: 0100000002040000020000000a00000001040000
+  - topic: lidar/pointcloud_ex
+    publish: 1
+    fieldsPreset: 1
+    fields: 0100000002040000020000000a0000000104000008000000070000000b0000000004000001040000020400000c000000
+  radarScanPublishers: []
 --- !u!114 &6422033487030486066
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -98,15 +101,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AutomaticCaptureHz: 10
   modelPreset: 3
+  returnType: 0
   applyDistanceGaussianNoise: 1
   applyAngularGaussianNoise: 1
   applyVelocityDistortion: 0
+  doValidateConfigurationOnStartup: 1
   configuration:
     id: 0
+  outputRestriction:
+    applyRestriction: 0
+    rectangularRestrictionMasks: []
+    enablePeriodicRestriction: 0
+    restrictionPeriod: 1
+    restrictionDutyRate: 0.5
+    enableRestrictionRandomizer: 0
+    minRandomPerdiod: 0
+    maxRandomPerdiod: 1
   references:
     version: 1
     00000000:
-      type: {class: UniformRangeLidarConfiguration, ns: RGLUnityPlugin, asm: Assembly-CSharp}
+      type: {class: UniformRangeLidarConfiguration, ns: RGLUnityPlugin, asm: AWSIM}
       data:
         _laserArray:
           centerOfMeasurementLinearOffsetMm: {x: 0, y: 37.34, z: 0}
@@ -340,7 +354,8 @@ MonoBehaviour:
         minHAngle: 0
         maxHAngle: 360
         laserArrayCycleTime: 0.055296
-        beamDivergence: 0.13
+        horizontalBeamDivergence: 0.171887
+        verticalBeamDivergence: 0.0859435
         noiseParams:
           angularNoiseType: 0
           angularNoiseStDev: 0.057295784

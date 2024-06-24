@@ -170,12 +170,12 @@ namespace AWSIM
         // Set value to clamp SteerAngleInput (degree).
         // -MaxSteerAngleInput <= SteerAngleInput <= MaxSteerAngleInput.
         [Range(0.01f, 80)]
-        [SerializeField] float MaxSteerAngleInput = 35f;
+        public float MaxSteerAngleInput = 35f;
 
         // Set value to clamp AccelerationInput (m/s^2).
         // -MaxAccelerationInput <= AccelerationInput <= MaxAccelerationInput.
         [Range(0.01f, 50)]
-        [SerializeField] float MaxAccelerationInput = 10;
+        public float MaxAccelerationInput = 10;
 
         [Header("Inputs")]
 
@@ -254,10 +254,12 @@ namespace AWSIM
         /// </summary>
         public Vector3 LocalAngularAcceleration => m_transform.InverseTransformDirection(AngularAcceleration);
 
+        /// <summary>
+        /// Vehicle automatic shift (P, R, N, D)
+        /// </summary>
+        public Shift AutomaticShift => AutomaticShiftInput;
 
         private float sleepTimer = 0.0f; ///Count the time until CanSleep is switched to true
-
-
 
         // Cache components.
         Wheel[] wheels;
@@ -489,7 +491,7 @@ namespace AWSIM
 
                     if (Speed > 0)
                     {
-                        var maxAcceleration = Speed / Time.deltaTime;
+                        var maxAcceleration = -Speed / Time.deltaTime;
                         if (acceleration > maxAcceleration)
                             acceleration = maxAcceleration;
                     }
