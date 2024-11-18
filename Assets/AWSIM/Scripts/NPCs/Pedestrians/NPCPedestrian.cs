@@ -59,7 +59,7 @@ namespace AWSIM
 
         private void OnValidate()
         {
-            rigidbody.isKinematic = true;
+            //rigidbody.isKinematic = true; // Commented out to allow kinematic option control
             rigidbody.useGravity = false;
             rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
         }

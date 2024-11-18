@@ -67,7 +67,11 @@ crashlytics-build.properties
 
 # Externals directory
 [Aa]ssets/AWSIM/Externals/*
-![Aa]ssets/AWSIM/Externals/.gitkeep
+![Aa]ssets/AWSIM/Externals/FacilityAssets/
+[Aa]ssets/AWSIM/Externals/FacilityAssets/*
+![Aa]ssets/AWSIM/Externals/FacilityAssets/Scripts/
+![Aa]ssets/AWSIM/Externals/FacilityAssets/Scripts/**
+
 
 # JetBrains
 /.idea/
