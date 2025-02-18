@@ -67,10 +67,9 @@ crashlytics-build.properties
 
 # Externals directory
 [Aa]ssets/AWSIM/Externals/*
-![Aa]ssets/AWSIM/Externals/FacilityAssets/
-[Aa]ssets/AWSIM/Externals/FacilityAssets/*
-![Aa]ssets/AWSIM/Externals/FacilityAssets/Scripts/
-![Aa]ssets/AWSIM/Externals/FacilityAssets/Scripts/**
+![Aa]ssets/AWSIM/Externals/Futu-reAssets/
+![Aa]ssets/AWSIM/Externals/Futu-reAssets.meta
+[Aa]ssets/AWSIM/Externals/Futu-reAssets/Models*
 
 
 # JetBrains
