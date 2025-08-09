@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using ROS2;
+using System;
 
 namespace AWSIM
 {
@@ -12,6 +14,8 @@ namespace AWSIM
     // up arrow : Accelerate
     // down arrow : Deceleration
     // left/right arrow : Steering
+
+    // (actions to keys below are not implemented)
     // D : Drive gear
     // P : Parking gear
     // R : Reverse gear
@@ -28,25 +32,107 @@ namespace AWSIM
         [SerializeField] float maxAcceleration = 1.5f;
         [SerializeField] float maxSteerAngle = 35;
 
+        [SerializeField] string joystickPluggerTopic = "/vehicle_interface/ifb_driver/joystick";
+
+        IPublisher<std_msgs.msg.Bool> joystickPlugStatePublisher;
+
+        [SerializeField] QoSSettings qosSettings = new QoSSettings();
+
+        float joyCommandAcceleration = 0;
+        float joyCommandSteerAngle = 0;
+
+        public bool active = false;
+        bool activePrev = false;
+
+        public bool suppressJoyPlugEvent = false;
+
         void Reset()
         {
             if (vehicle == null)
                 vehicle = GetComponent<Vehicle>();
+
+            // initialize default QoS params.
+            qosSettings.ReliabilityPolicy = ReliabilityPolicy.QOS_POLICY_RELIABILITY_RELIABLE;
+            qosSettings.DurabilityPolicy = DurabilityPolicy.QOS_POLICY_DURABILITY_TRANSIENT_LOCAL;
+            qosSettings.HistoryPolicy = HistoryPolicy.QOS_POLICY_HISTORY_KEEP_LAST;
+            qosSettings.Depth = 1;
         }
+
+        void Start()
+        {
+            var qos = qosSettings.GetQoSProfile();
+
+            joystickPlugStatePublisher = SimulatorROS2Node.CreatePublisher<std_msgs.msg.Bool>(joystickPluggerTopic, qos);
+        }
+
 
         void Update()
         {
+
             // get arrow inputs
-            var horizontal = Input.GetAxis("Horizontal");
-            var vertical = Input.GetAxis("Vertical");
+            joyCommandSteerAngle = Input.GetAxis("Horizontal");
+            joyCommandAcceleration = Input.GetAxis("Vertical");
 
-            // set acceleration
-            vehicle.AccelerationInput = maxAcceleration * vertical;
+            std_msgs.msg.Bool joystickPluggedMsg = new std_msgs.msg.Bool
+            {
+                Data = active && !suppressJoyPlugEvent
+            };
+            joystickPlugStatePublisher.Publish(joystickPluggedMsg);
 
-            // set steer
-            vehicle.SteerAngleInput = maxSteerAngle * horizontal;
+
+            if (active)
+            {
+                if (!activePrev)
+                {
+                    vehicle.AccelerationInput = -3.0f;
+                }
+                else
+                {
+                    //vehicle.AccelerationInput = Mathf.Abs(joyCommandAcceleration);
+                    float speed = vehicle.Speed;
+                    if (0 < speed)
+                    {
+                        vehicle.AutomaticShiftInput = Vehicle.Shift.DRIVE;
+                        if (joyCommandAcceleration < 0)
+                        {
+                            joyCommandAcceleration *= 3.0f;
+                        }
+                        vehicle.AccelerationInput = joyCommandAcceleration;
+                    }
+                    else if (speed == 0)
+                    {
+                        var shift = (0 < joyCommandAcceleration ? Vehicle.Shift.DRIVE :
+                                                       joyCommandAcceleration < 0 ? Vehicle.Shift.REVERSE :
+                                                       Vehicle.Shift.PARKING);
+                        var accInput = Mathf.Abs(joyCommandAcceleration);
+                        vehicle.AutomaticShiftInput = shift;
+                        vehicle.AccelerationInput = accInput;
+                        Debug.Log("[speed=0] shift:" + shift + " accInput:" + accInput);
+                    }
+                    else
+                    {
+                        vehicle.AutomaticShiftInput = Vehicle.Shift.REVERSE;
+                        if (0 < joyCommandAcceleration)
+                        {
+                            joyCommandAcceleration *= 3.0f;
+                        }
+                        vehicle.AccelerationInput = -joyCommandAcceleration;
+                    }
+                    vehicle.SteerAngleInput = (float)joyCommandSteerAngle * Mathf.Rad2Deg;
+                    Debug.Log("[UPD] Spd:" + speed + " Shift:" + vehicle.AutomaticShiftInput + " Acc:" + vehicle.AccelerationInput + " Steer:" + vehicle.SteerAngleInput);
+                }
+            }
+            else
+            {
+                if (activePrev)
+                {
+                    vehicle.AccelerationInput = -3.0f;
+                }
+            }
+            activePrev = active;
 
             // set gear
+            /*
             if (Input.GetKey(KeyCode.D))
                 vehicle.AutomaticShiftInput = Vehicle.Shift.DRIVE;
             else if (Input.GetKey(KeyCode.P))
@@ -65,6 +151,7 @@ namespace AWSIM
                 vehicle.SignalInput = Vehicle.TurnSignal.HAZARD;
             else if (Input.GetKey(KeyCode.Alpha4))
                 vehicle.SignalInput = Vehicle.TurnSignal.NONE;
+                */
         }
     }
 }

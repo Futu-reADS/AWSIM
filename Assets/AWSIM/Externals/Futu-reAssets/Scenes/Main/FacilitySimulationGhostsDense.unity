@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 262.3369, g: 325.0498, b: 430.2192, a: 1}
+  m_IndirectSpecularColor: {r: 1520.0924, g: 1884.674, b: 2491.8425, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -4865,6 +4865,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1416174297}
     m_Modifications:
+    - target: {fileID: 1215627195294922537, guid: 7a7a8b61cb73f68e19c1963d234ef8a6, type: 3}
+      propertyPath: ackermannControlCommandTopic
+      value: /control/command/control_cmd
+      objectReference: {fileID: 0}
     - target: {fileID: 4438660263583880402, guid: 7a7a8b61cb73f68e19c1963d234ef8a6, type: 3}
       propertyPath: m_Convex
       value: 1
@@ -14384,6 +14388,7 @@ MonoBehaviour:
   - {fileID: 6604874415271597525, guid: 7e772e9ad7eb79040be629d8d04542ab, type: 3}
   - {fileID: 1097139478755613818, guid: 0f4ee316b5d9eadb6b857e4150c09d20, type: 3}
   directionIndicatorPrefab: {fileID: 4304461558514222765, guid: 0bac2562f5fcf75a4a57358dd8fc3318, type: 3}
+  egoVehicle: {fileID: 0}
 --- !u!114 &1563060718
 MonoBehaviour:
   m_ObjectHideFlags: 0

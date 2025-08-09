@@ -18,11 +18,9 @@ namespace AWSIM
         [SerializeField] string ackermannControlCommandTopic = "/control/command/control_cmd";
         [SerializeField] string gearCommandTopic = "/control/command/gear_cmd";
         [SerializeField] string vehicleEmergencyStampedTopic = "/control/command/emergency_cmd";
-        [SerializeField] string joyTopic = "/joy";
-        [SerializeField] string joystickPluggerTopic = "/vehicle_interface/ifb_driver/joystick";
-
         [SerializeField] QoSSettings qosSettings = new QoSSettings();
         [SerializeField] Vehicle vehicle;
+        [SerializeField] VehicleKeyboardInput vehicleKeyboardInput;
 
         // subscribers.
         ISubscription<autoware_auto_vehicle_msgs.msg.TurnIndicatorsCommand> turnIndicatorsCommandSubscriber;
@@ -30,9 +28,6 @@ namespace AWSIM
         ISubscription<autoware_auto_control_msgs.msg.AckermannControlCommand> ackermanControlCommandSubscriber;
         ISubscription<autoware_auto_vehicle_msgs.msg.GearCommand> gearCommandSubscriber;
         ISubscription<tier4_vehicle_msgs.msg.VehicleEmergencyStamped> vehicleEmergencyStampedSubscriber;
-        ISubscription<sensor_msgs.msg.Joy> joySubscriber;
-
-        IPublisher<std_msgs.msg.Bool> joystickPluggedPublisher;        
 
         // Latest Emergency value.
         // If emergency is true, emergencyDeceleration is applied to the vehicle's deceleration.
@@ -46,9 +41,6 @@ namespace AWSIM
         Vehicle.TurnSignal turnIndicatorsSignal = Vehicle.TurnSignal.NONE;
         Vehicle.TurnSignal hazardLightsSignal = Vehicle.TurnSignal.NONE;
         Vehicle.TurnSignal input = Vehicle.TurnSignal.NONE;
-
-        bool isJoystickPlugged = false;
-        bool isJoystickValid = false;
 
         void Reset()
         {
@@ -85,8 +77,6 @@ namespace AWSIM
         {
             var qos = qosSettings.GetQoSProfile();
 
-            joystickPluggedPublisher = SimulatorROS2Node.CreatePublisher<std_msgs.msg.Bool>(joystickPluggerTopic, qos);
-
             turnIndicatorsCommandSubscriber
                 = SimulatorROS2Node.CreateSubscription<autoware_auto_vehicle_msgs.msg.TurnIndicatorsCommand>(
                     turnIndicatorsCommandTopic, msg =>
@@ -107,14 +97,16 @@ namespace AWSIM
                 = SimulatorROS2Node.CreateSubscription<autoware_auto_control_msgs.msg.AckermannControlCommand>(
                     ackermannControlCommandTopic, msg =>
                     {
-                        // highest priority is EMERGENCY.
-                        // If Emergency is true, ControlCommand is not used for vehicle acceleration input.
-                        if (!isJoystickValid)
+                        if (!vehicleKeyboardInput.active)
                         {
+                            // highest priority is EMERGENCY.
+                            // If Emergency is true, ControlCommand is not used for vehicle acceleration input.
                             if (!isEmergency)
                                 vehicle.AccelerationInput = msg.Longitudinal.Acceleration;
 
+                            vehicle.AutomaticShiftInput = Vehicle.Shift.DRIVE;
                             vehicle.SteerAngleInput = -(float)msg.Lateral.Steering_tire_angle * Mathf.Rad2Deg;
+                            Debug.Log("[ackermann] acc:" + msg.Longitudinal.Acceleration + " steer:" + msg.Lateral.Steering_tire_angle);
                         }
                     }, qos);
 
@@ -122,7 +114,7 @@ namespace AWSIM
                 = SimulatorROS2Node.CreateSubscription<autoware_auto_vehicle_msgs.msg.GearCommand>(
                     gearCommandTopic, msg =>
                     {
-                        if (!isJoystickValid)
+                        if (!vehicleKeyboardInput.active)
                         {
                             vehicle.AutomaticShiftInput = VehicleROS2Utility.RosToUnityShift(msg);
                         }
@@ -135,37 +127,10 @@ namespace AWSIM
                         // highest priority is EMERGENCY.
                         // If emergency is true, emergencyDeceleration is applied to the vehicle's deceleration.
                         isEmergency = msg.Emergency;
-                        if (isEmergency)
+                        if (isEmergency && !vehicleKeyboardInput.active)
                             vehicle.AccelerationInput = emergencyDeceleration;
                     });
 
-            joySubscriber
-                = SimulatorROS2Node.CreateSubscription<sensor_msgs.msg.Joy>(
-                    joyTopic, msg =>
-                    {
-                        isJoystickPlugged = (msg.Buttons[0] != 0);
-                        isJoystickValid = ((msg.Buttons[1] != 0) || isJoystickPlugged);
-                        if (isJoystickValid)
-                        {
-                            if (!isEmergency)
-                            {
-                                vehicle.AccelerationInput = Mathf.Abs(msg.Axes[1]);
-                                if (msg.Axes[1] >= 0)
-                                {
-                                    vehicle.AutomaticShiftInput = Vehicle.Shift.DRIVE;
-                                }
-                                else
-                                {
-                                    vehicle.AutomaticShiftInput = Vehicle.Shift.REVERSE;
-                                }
-                                    
-                            }
-                            vehicle.SteerAngleInput = -(float)msg.Axes[0] * Mathf.Rad2Deg;
-                        }
-                        std_msgs.msg.Bool joystickPluggedMsg = new std_msgs.msg.Bool();
-                        joystickPluggedMsg.Data = isJoystickPlugged;
-                        joystickPluggedPublisher.Publish(joystickPluggedMsg);
-                    });
         }
         void OnDestroy()
         {
@@ -174,7 +139,6 @@ namespace AWSIM
             SimulatorROS2Node.RemoveSubscription<autoware_auto_control_msgs.msg.AckermannControlCommand>(ackermanControlCommandSubscriber);
             SimulatorROS2Node.RemoveSubscription<autoware_auto_vehicle_msgs.msg.GearCommand>(gearCommandSubscriber);
             SimulatorROS2Node.RemoveSubscription<tier4_vehicle_msgs.msg.VehicleEmergencyStamped>(vehicleEmergencyStampedSubscriber);
-            SimulatorROS2Node.RemoveSubscription<sensor_msgs.msg.Joy>(joySubscriber);
         }
     }
 }
