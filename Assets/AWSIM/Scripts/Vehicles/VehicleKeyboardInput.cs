@@ -35,8 +35,10 @@ namespace AWSIM
         [SerializeField] string joystickPluggerTopic = "/vehicle_interface/ifb_driver/joystick";
 
         IPublisher<std_msgs.msg.Bool> joystickPlugStatePublisher;
+        std_msgs.msg.Bool joystickPlugStateMsg;
 
         [SerializeField] QoSSettings qosSettings = new QoSSettings();
+        [SerializeField, Range(1, 100)] int joystickPublishHz = 10; // Default to 10 Hz
 
         float joyCommandAcceleration = 0;
         float joyCommandSteerAngle = 0;
@@ -46,39 +48,50 @@ namespace AWSIM
 
         public bool suppressJoyPlugEvent = false;
 
-        void Reset()
-        {
-            if (vehicle == null)
-                vehicle = GetComponent<Vehicle>();
+        float joystickNextPublishTime = 0;
+        float joystickPublishInterval;
 
+        void Awake()
+        {
+            var qos = qosSettings.GetQoSProfile();
+            //boolPublisher = SimulatorROS2Node.CreatePublisher<std_msgs.msg.Bool>(topic, qos);
+            //boolMsg = new std_msgs.msg.Bool();
+            //toggle.onValueChanged.AddListener(SetToggleState); // Add listener for toggle value change
+            //publishInterval = 1.0f / publishHz; // Calculate interval based on publishHz
+            joystickPlugStatePublisher = SimulatorROS2Node.CreatePublisher<std_msgs.msg.Bool>(joystickPluggerTopic, qos);
+            joystickPlugStateMsg = new std_msgs.msg.Bool();
+            joystickPublishInterval = 1.0f / joystickPublishHz;
+
+/*
             // initialize default QoS params.
             qosSettings.ReliabilityPolicy = ReliabilityPolicy.QOS_POLICY_RELIABILITY_RELIABLE;
             qosSettings.DurabilityPolicy = DurabilityPolicy.QOS_POLICY_DURABILITY_TRANSIENT_LOCAL;
             qosSettings.HistoryPolicy = HistoryPolicy.QOS_POLICY_HISTORY_KEEP_LAST;
             qosSettings.Depth = 1;
+*/
+        }
+
+        void Reset()
+        {
+            if (vehicle == null)
+                vehicle = GetComponent<Vehicle>();
+
         }
 
         void Start()
         {
-            var qos = qosSettings.GetQoSProfile();
-
-            joystickPlugStatePublisher = SimulatorROS2Node.CreatePublisher<std_msgs.msg.Bool>(joystickPluggerTopic, qos);
+            joystickNextPublishTime = Time.time + joystickPublishInterval;
         }
 
 
         void Update()
         {
-
-            // get arrow inputs
-            joyCommandSteerAngle = Input.GetAxis("Horizontal");
-            joyCommandAcceleration = Input.GetAxis("Vertical");
-
-            std_msgs.msg.Bool joystickPluggedMsg = new std_msgs.msg.Bool
+            if (Time.time >= joystickNextPublishTime)
             {
-                Data = active && !suppressJoyPlugEvent
-            };
-            joystickPlugStatePublisher.Publish(joystickPluggedMsg);
-
+                joystickPlugStateMsg.Data = active && !suppressJoyPlugEvent;
+                joystickPlugStatePublisher.Publish(joystickPlugStateMsg);
+                joystickNextPublishTime += 1.0f / joystickPublishHz;
+            }
 
             if (active)
             {
@@ -88,6 +101,10 @@ namespace AWSIM
                 }
                 else
                 {
+                    // get arrow inputs
+                    joyCommandSteerAngle = Input.GetAxis("Horizontal");
+                    joyCommandAcceleration = Input.GetAxis("Vertical");
+
                     //vehicle.AccelerationInput = Mathf.Abs(joyCommandAcceleration);
                     float speed = vehicle.Speed;
                     if (0 < speed)
@@ -153,5 +170,12 @@ namespace AWSIM
                 vehicle.SignalInput = Vehicle.TurnSignal.NONE;
                 */
         }
+
+        void OnDestroy()
+        {
+            SimulatorROS2Node.RemovePublisher<std_msgs.msg.Bool>(joystickPlugStatePublisher);
+        }
     }
+
+    
 }

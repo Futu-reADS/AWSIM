@@ -20,6 +20,7 @@ namespace AWSIM
         [SerializeField] string vehicleEmergencyStampedTopic = "/control/command/emergency_cmd";
         [SerializeField] QoSSettings qosSettings = new QoSSettings();
         [SerializeField] Vehicle vehicle;
+        [SerializeField] VehicleSpeedController vehicleSpeedController;
         [SerializeField] VehicleKeyboardInput vehicleKeyboardInput;
 
         // subscribers.
@@ -46,6 +47,8 @@ namespace AWSIM
         {
             if (vehicle == null)
                 vehicle = GetComponent<Vehicle>();
+            if (vehicleSpeedController == null)
+                vehicleSpeedController = GetComponent<VehicleSpeedController>();
 
             // initialize default QoS params.
             qosSettings.ReliabilityPolicy = ReliabilityPolicy.QOS_POLICY_RELIABILITY_RELIABLE;
@@ -102,11 +105,13 @@ namespace AWSIM
                             // highest priority is EMERGENCY.
                             // If Emergency is true, ControlCommand is not used for vehicle acceleration input.
                             if (!isEmergency)
-                                vehicle.AccelerationInput = msg.Longitudinal.Acceleration;
+                            {
+                                //vehicle.AccelerationInput = msg.Longitudinal.Acceleration;
+                                vehicleSpeedController.SpeedInput = msg.Longitudinal.Speed;
+                            }
 
-                            vehicle.AutomaticShiftInput = Vehicle.Shift.DRIVE;
                             vehicle.SteerAngleInput = -(float)msg.Lateral.Steering_tire_angle * Mathf.Rad2Deg;
-                            Debug.Log("[ackermann] acc:" + msg.Longitudinal.Acceleration + " steer:" + msg.Lateral.Steering_tire_angle);
+                            //Debug.Log("[ackermann] acc:" + msg.Longitudinal.Acceleration + " steer:" + msg.Lateral.Steering_tire_angle);
                         }
                     }, qos);
 
@@ -132,6 +137,7 @@ namespace AWSIM
                     });
 
         }
+
         void OnDestroy()
         {
             SimulatorROS2Node.RemoveSubscription<autoware_auto_vehicle_msgs.msg.TurnIndicatorsCommand>(turnIndicatorsCommandSubscriber);
@@ -139,6 +145,15 @@ namespace AWSIM
             SimulatorROS2Node.RemoveSubscription<autoware_auto_control_msgs.msg.AckermannControlCommand>(ackermanControlCommandSubscriber);
             SimulatorROS2Node.RemoveSubscription<autoware_auto_vehicle_msgs.msg.GearCommand>(gearCommandSubscriber);
             SimulatorROS2Node.RemoveSubscription<tier4_vehicle_msgs.msg.VehicleEmergencyStamped>(vehicleEmergencyStampedSubscriber);
+        }
+
+        void OnEnable()
+        {
+            vehicleSpeedController.enabled = true;
+        }
+        void OnDisable()
+        {
+            vehicleSpeedController.enabled = false;
         }
     }
 }

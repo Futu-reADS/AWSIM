@@ -69,7 +69,9 @@ namespace AWSIM
                     }
                     rb.drag = estopDrag; // Set the drag value 
                     rb.angularDrag = estopDrag; // Set the drag value 
-                } else {
+                }
+                else
+                {
                     rb.drag = defaultDrag; // Set the drag value
                     rb.angularDrag = defaultAngularDrag; // Set the drag value
                     rb.isKinematic = false;
@@ -88,5 +90,7 @@ namespace AWSIM
         {
             toggleState = state; // Set the toggle state
         }
+        
+        public bool ToggleState { get { return toggleState; } }
     }
 }

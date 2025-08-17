@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 1520.0924, g: 1884.674, b: 2491.8425, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -3361,6 +3361,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80ebb0e40b62ca443ba1d8ccf61fcbda, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &417506410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 417506403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebccc5b15d5cf3205aecb025c537ae47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vehicle: {fileID: 417506408}
+  estopButton: {fileID: 472376178}
+  ProportionalGain: 1.5
+  IntegralGain: 0.0625
+  SpeedInput: 0
+  integralTerm: 0
 --- !u!1 &418333189
 GameObject:
   m_ObjectHideFlags: 0
@@ -5335,6 +5353,10 @@ PrefabInstance:
       propertyPath: vehicleKeyboardInput
       value: 
       objectReference: {fileID: 417506407}
+    - target: {fileID: 1215627195294922537, guid: 7a7a8b61cb73f68e19c1963d234ef8a6, type: 3}
+      propertyPath: vehicleSpeedController
+      value: 
+      objectReference: {fileID: 417506410}
     - target: {fileID: 2259460520370506082, guid: 7a7a8b61cb73f68e19c1963d234ef8a6, type: 3}
       propertyPath: m_LocalRotation.w
       value: 1
@@ -96612,8 +96634,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1925267639}
   m_HandleRect: {fileID: 1925267638}
   m_Direction: 2
-  m_Value: 1
-  m_Size: 0.36092895
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
