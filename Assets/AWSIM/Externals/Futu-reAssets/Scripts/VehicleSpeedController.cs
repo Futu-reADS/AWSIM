@@ -21,7 +21,7 @@ namespace AWSIM
         [SerializeField] public float ProportionalGain = 1.5f;
         // integral gain to generate acceleration command from difference in speed command versus actual speed.
         [Range(0, 2.0f)]
-        [SerializeField] public float IntegralGain = 0.0625f;
+        [SerializeField] public float IntegralGain = 0.125f;
 
         public float SpeedInput = 0.0f;
         public float integralTerm = 0;
@@ -39,7 +39,7 @@ namespace AWSIM
             }
             // Generate accelerationInput from SpeedInput
             var actualSpeed = ROS2Utility.UnityToRosPosition(vehicle.LocalVelocity).x;
-            var deltaSpeed = Mathf.Abs(SpeedInput) - Mathf.Abs(actualSpeed);
+            var deltaSpeed   = Mathf.Abs(SpeedInput) - Mathf.Abs(actualSpeed);
             vehicle.AccelerationInput = ProportionalGain * deltaSpeed + IntegralGain * integralTerm;
             integralTerm += IntegralGain * deltaSpeed;
             integralTerm = Mathf.Clamp(integralTerm, 0, 5.0f);

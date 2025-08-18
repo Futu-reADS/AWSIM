@@ -3339,6 +3339,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf5efb70a440286439770e3549221730, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &417506406
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 417506403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89c2f630853f977d28ccbe71f1669168, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vehicle: {fileID: 417506408}
+  estopButton: {fileID: 472376178}
+  ProportionalGain: 8
+  IntegralGain: 0.2
+  SpeedInput: 0
+  integralTerm: 0
 --- !u!114 &417506407 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5969829010891837309, guid: 7a7a8b61cb73f68e19c1963d234ef8a6, type: 3}
@@ -3361,24 +3379,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80ebb0e40b62ca443ba1d8ccf61fcbda, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &417506410
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 417506403}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ebccc5b15d5cf3205aecb025c537ae47, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  vehicle: {fileID: 417506408}
-  estopButton: {fileID: 472376178}
-  ProportionalGain: 1.5
-  IntegralGain: 0.0625
-  SpeedInput: 0
-  integralTerm: 0
 --- !u!1 &418333189
 GameObject:
   m_ObjectHideFlags: 0
@@ -5356,7 +5356,7 @@ PrefabInstance:
     - target: {fileID: 1215627195294922537, guid: 7a7a8b61cb73f68e19c1963d234ef8a6, type: 3}
       propertyPath: vehicleSpeedController
       value: 
-      objectReference: {fileID: 417506410}
+      objectReference: {fileID: 417506406}
     - target: {fileID: 2259460520370506082, guid: 7a7a8b61cb73f68e19c1963d234ef8a6, type: 3}
       propertyPath: m_LocalRotation.w
       value: 1

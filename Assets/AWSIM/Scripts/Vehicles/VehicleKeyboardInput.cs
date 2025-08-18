@@ -105,6 +105,8 @@ namespace AWSIM
                     joyCommandSteerAngle = Input.GetAxis("Horizontal");
                     joyCommandAcceleration = Input.GetAxis("Vertical");
 
+                    Debug.Log("[Input.GetAxis] Hor:" + joyCommandAcceleration + " Ver:" + joyCommandAcceleration);
+
                     //vehicle.AccelerationInput = Mathf.Abs(joyCommandAcceleration);
                     float speed = vehicle.Speed;
                     if (0 < speed)
