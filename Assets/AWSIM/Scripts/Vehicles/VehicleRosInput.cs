@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using ROS2;
+using System;
 
 namespace AWSIM
 {
@@ -17,9 +18,10 @@ namespace AWSIM
         [SerializeField] string ackermannControlCommandTopic = "/control/command/control_cmd";
         [SerializeField] string gearCommandTopic = "/control/command/gear_cmd";
         [SerializeField] string vehicleEmergencyStampedTopic = "/control/command/emergency_cmd";
-
         [SerializeField] QoSSettings qosSettings = new QoSSettings();
         [SerializeField] Vehicle vehicle;
+        [SerializeField] VehicleSpeedController vehicleSpeedController;
+        [SerializeField] VehicleKeyboardInput vehicleKeyboardInput;
 
         // subscribers.
         ISubscription<autoware_auto_vehicle_msgs.msg.TurnIndicatorsCommand> turnIndicatorsCommandSubscriber;
@@ -41,11 +43,12 @@ namespace AWSIM
         Vehicle.TurnSignal hazardLightsSignal = Vehicle.TurnSignal.NONE;
         Vehicle.TurnSignal input = Vehicle.TurnSignal.NONE;
 
-
         void Reset()
         {
             if (vehicle == null)
                 vehicle = GetComponent<Vehicle>();
+            if (vehicleSpeedController == null)
+                vehicleSpeedController = GetComponent<VehicleSpeedController>();
 
             // initialize default QoS params.
             qosSettings.ReliabilityPolicy = ReliabilityPolicy.QOS_POLICY_RELIABILITY_RELIABLE;
@@ -97,19 +100,29 @@ namespace AWSIM
                 = SimulatorROS2Node.CreateSubscription<autoware_auto_control_msgs.msg.AckermannControlCommand>(
                     ackermannControlCommandTopic, msg =>
                     {
-                        // highest priority is EMERGENCY.
-                        // If Emergency is true, ControlCommand is not used for vehicle acceleration input.
-                        if (!isEmergency)
-                            vehicle.AccelerationInput = msg.Longitudinal.Acceleration;
+                        if (!vehicleKeyboardInput.active)
+                        {
+                            // highest priority is EMERGENCY.
+                            // If Emergency is true, ControlCommand is not used for vehicle acceleration input.
+                            if (!isEmergency)
+                            {
+                                //vehicle.AccelerationInput = msg.Longitudinal.Acceleration;
+                                vehicleSpeedController.SpeedInput = msg.Longitudinal.Speed;
+                            }
 
-                        vehicle.SteerAngleInput = -(float)msg.Lateral.Steering_tire_angle * Mathf.Rad2Deg;
+                            vehicle.SteerAngleInput = -(float)msg.Lateral.Steering_tire_angle * Mathf.Rad2Deg;
+                            //Debug.Log("[ackermann] acc:" + msg.Longitudinal.Acceleration + " steer:" + msg.Lateral.Steering_tire_angle);
+                        }
                     }, qos);
 
             gearCommandSubscriber
                 = SimulatorROS2Node.CreateSubscription<autoware_auto_vehicle_msgs.msg.GearCommand>(
                     gearCommandTopic, msg =>
                     {
-                        vehicle.AutomaticShiftInput = VehicleROS2Utility.RosToUnityShift(msg);
+                        if (!vehicleKeyboardInput.active)
+                        {
+                            vehicle.AutomaticShiftInput = VehicleROS2Utility.RosToUnityShift(msg);
+                        }
                     }, qos);
 
             vehicleEmergencyStampedSubscriber
@@ -119,9 +132,10 @@ namespace AWSIM
                         // highest priority is EMERGENCY.
                         // If emergency is true, emergencyDeceleration is applied to the vehicle's deceleration.
                         isEmergency = msg.Emergency;
-                        if (isEmergency)
+                        if (isEmergency && !vehicleKeyboardInput.active)
                             vehicle.AccelerationInput = emergencyDeceleration;
                     });
+
         }
 
         void OnDestroy()
@@ -131,6 +145,15 @@ namespace AWSIM
             SimulatorROS2Node.RemoveSubscription<autoware_auto_control_msgs.msg.AckermannControlCommand>(ackermanControlCommandSubscriber);
             SimulatorROS2Node.RemoveSubscription<autoware_auto_vehicle_msgs.msg.GearCommand>(gearCommandSubscriber);
             SimulatorROS2Node.RemoveSubscription<tier4_vehicle_msgs.msg.VehicleEmergencyStamped>(vehicleEmergencyStampedSubscriber);
+        }
+
+        void OnEnable()
+        {
+            vehicleSpeedController.enabled = true;
+        }
+        void OnDisable()
+        {
+            vehicleSpeedController.enabled = false;
         }
     }
 }
