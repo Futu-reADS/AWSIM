@@ -3353,8 +3353,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   vehicle: {fileID: 417506408}
   estopButton: {fileID: 472376178}
-  ProportionalGain: 8
-  IntegralGain: 0.2
+  ProportionalGain: 4
+  IntegralGain: 0.1
   SpeedInput: 0
   integralTerm: 0
 --- !u!114 &417506407 stripped
@@ -5313,6 +5313,34 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 70125021605757507, guid: 7a7a8b61cb73f68e19c1963d234ef8a6, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 70125021605757507, guid: 7a7a8b61cb73f68e19c1963d234ef8a6, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 70125021605757507, guid: 7a7a8b61cb73f68e19c1963d234ef8a6, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 70125021605757507, guid: 7a7a8b61cb73f68e19c1963d234ef8a6, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 70125021605757507, guid: 7a7a8b61cb73f68e19c1963d234ef8a6, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 70125021605757507, guid: 7a7a8b61cb73f68e19c1963d234ef8a6, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 70125021605757507, guid: 7a7a8b61cb73f68e19c1963d234ef8a6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 461824897498990356, guid: 7a7a8b61cb73f68e19c1963d234ef8a6, type: 3}
       propertyPath: m_Materials.Array.size
       value: 2
@@ -5357,6 +5385,22 @@ PrefabInstance:
       propertyPath: vehicleSpeedController
       value: 
       objectReference: {fileID: 417506406}
+    - target: {fileID: 2259460520289234991, guid: 7a7a8b61cb73f68e19c1963d234ef8a6, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 2259460520289234991, guid: 7a7a8b61cb73f68e19c1963d234ef8a6, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.9925462
+      objectReference: {fileID: 0}
+    - target: {fileID: 2259460520289234991, guid: 7a7a8b61cb73f68e19c1963d234ef8a6, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.12186928
+      objectReference: {fileID: 0}
+    - target: {fileID: 2259460520289234991, guid: 7a7a8b61cb73f68e19c1963d234ef8a6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 14
+      objectReference: {fileID: 0}
     - target: {fileID: 2259460520370506082, guid: 7a7a8b61cb73f68e19c1963d234ef8a6, type: 3}
       propertyPath: m_LocalRotation.w
       value: 1
