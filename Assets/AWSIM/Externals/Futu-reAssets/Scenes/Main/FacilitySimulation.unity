@@ -3353,8 +3353,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   vehicle: {fileID: 417506408}
   estopButton: {fileID: 472376178}
-  ProportionalGain: 4
-  IntegralGain: 0.1
+  ProportionalGain: 2
+  IntegralGain: 0.13
   SpeedInput: 0
   integralTerm: 0
 --- !u!114 &417506407 stripped
@@ -93430,8 +93430,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1440300546}
   m_HandleRect: {fileID: 1440300545}
   m_Direction: 0
-  m_Value: 0
-  m_Size: 0.9999999
+  m_Value: 1
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
