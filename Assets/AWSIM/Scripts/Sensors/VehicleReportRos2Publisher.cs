@@ -11,6 +11,10 @@ namespace AWSIM
     public class VehicleReportRos2Publisher : MonoBehaviour
     {
         /// <summary>
+        /// Topic program
+        /// </summary>
+        
+        /// <summary>
         /// Topic name of ControlModeReport msg.
         /// </summary>
         [SerializeField] string controlModeReportTopic = "/vehicle/status/control_mode";
@@ -54,6 +58,8 @@ namespace AWSIM
         [SerializeField] QoSSettings qosSettings;
 
         [SerializeField] Vehicle vehicle;
+
+        [SerializeField] VehicleModeManager modeManager;
 
         // msgs.
         autoware_auto_vehicle_msgs.msg.ControlModeReport controlModeReportMsg;
@@ -118,7 +124,21 @@ namespace AWSIM
             timer = 0;
 
             // ControlModeReport
-            controlModeReportMsg.Mode = autoware_auto_vehicle_msgs.msg.ControlModeReport.AUTONOMOUS;
+            switch (modeManager.ControlMode)
+            {
+                case VehicleModeManager.ModeValue.AUTO:
+                    controlModeReportMsg.Mode = autoware_auto_vehicle_msgs.msg.ControlModeReport.AUTONOMOUS;
+                    break;
+
+                case VehicleModeManager.ModeValue.MANUAL:
+                    controlModeReportMsg.Mode = autoware_auto_vehicle_msgs.msg.ControlModeReport.MANUAL;
+                    break;
+
+                case VehicleModeManager.ModeValue.STOP:
+                default:
+                    controlModeReportMsg.Mode = autoware_auto_vehicle_msgs.msg.ControlModeReport.DISENGAGED;
+                    break;
+            }
 
             // GearReport
             gearReportMsg.Report = VehicleROS2Utility.UnityToRosShift(vehicle.AutomaticShiftInput);
