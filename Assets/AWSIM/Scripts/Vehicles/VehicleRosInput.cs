@@ -43,6 +43,9 @@ namespace AWSIM
         Vehicle.TurnSignal hazardLightsSignal = Vehicle.TurnSignal.NONE;
         Vehicle.TurnSignal input = Vehicle.TurnSignal.NONE;
 
+        // Clear SpeedInput in case no ackermann control command is comming. This is to emulate our real vehicle.
+        int countSinceLastAckermannCommand = 0;
+
         void Reset()
         {
             if (vehicle == null)
@@ -112,6 +115,7 @@ namespace AWSIM
 
                             vehicle.SteerAngleInput = -(float)msg.Lateral.Steering_tire_angle * Mathf.Rad2Deg;
                             //Debug.Log("[ackermann] acc:" + msg.Longitudinal.Acceleration + " steer:" + msg.Lateral.Steering_tire_angle);
+                            countSinceLastAckermannCommand = 0;
                         }
                     }, qos);
 
@@ -136,6 +140,19 @@ namespace AWSIM
                             vehicle.AccelerationInput = emergencyDeceleration;
                     });
 
+        }
+
+        void FixedUpdate()
+        {
+            if (0.5 <= Time.deltaTime * countSinceLastAckermannCommand)
+            {
+                vehicleSpeedController.SpeedInput = 0;
+                countSinceLastAckermannCommand = 0;
+            }
+            else
+            {
+                countSinceLastAckermannCommand++;
+            }
         }
 
         void OnDestroy()
