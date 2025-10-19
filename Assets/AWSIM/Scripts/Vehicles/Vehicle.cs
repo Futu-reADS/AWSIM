@@ -277,6 +277,10 @@ namespace AWSIM
         Quaternion sleepRotation;
         bool lastSleep;
 
+        Vector3 positionToTeleport;
+        Quaternion rotationToTeleport;
+        bool flgTeleport = false;
+
         void Awake()
         {
             m_rigidbody = GetComponent<Rigidbody>();
@@ -438,6 +442,13 @@ namespace AWSIM
 
             void UpdateVehicleSleep(bool isSleep)
             {
+                if (isSleep == true && flgTeleport)
+                {
+                    sleepPositon = positionToTeleport;
+                    sleepRotation = rotationToTeleport;
+                    flgTeleport = false;
+                }
+
                 if (isSleep == true && lastSleep == false)
                 {
                     sleepPositon = transform.position;
@@ -507,6 +518,13 @@ namespace AWSIM
                 foreach (var wheel in wheels)
                     wheel.UpdateWheelForce(perWheelAcceleration);
             }
+        }
+
+        public void TeleportRigidbody(Vector3 newPosition, Quaternion newRotation)
+        {
+            positionToTeleport = newPosition;
+            rotationToTeleport = newRotation;
+            flgTeleport = true;
         }
     }
 }
