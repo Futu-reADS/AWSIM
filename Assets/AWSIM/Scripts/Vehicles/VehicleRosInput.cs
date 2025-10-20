@@ -18,6 +18,7 @@ namespace AWSIM
         [SerializeField] string ackermannControlCommandTopic = "/control/command/control_cmd";
         [SerializeField] string gearCommandTopic = "/control/command/gear_cmd";
         [SerializeField] string vehicleEmergencyStampedTopic = "/control/command/emergency_cmd";
+        [SerializeField] string setAbsolutePoseTopic = "/awsim/set_absolute_pose";
         [SerializeField] QoSSettings qosSettings = new QoSSettings();
         [SerializeField] Vehicle vehicle;
         [SerializeField] VehicleSpeedController vehicleSpeedController;
@@ -29,6 +30,7 @@ namespace AWSIM
         ISubscription<autoware_auto_control_msgs.msg.AckermannControlCommand> ackermanControlCommandSubscriber;
         ISubscription<autoware_auto_vehicle_msgs.msg.GearCommand> gearCommandSubscriber;
         ISubscription<tier4_vehicle_msgs.msg.VehicleEmergencyStamped> vehicleEmergencyStampedSubscriber;
+        ISubscription<geometry_msgs.msg.Pose> setAbsolutePoseSubscriber;
 
         // Latest Emergency value.
         // If emergency is true, emergencyDeceleration is applied to the vehicle's deceleration.
@@ -139,6 +141,19 @@ namespace AWSIM
                         if (isEmergency && !vehicleKeyboardInput.active)
                             vehicle.AccelerationInput = emergencyDeceleration;
                     });
+
+            setAbsolutePoseSubscriber
+            = SimulatorROS2Node.CreateSubscription<geometry_msgs.msg.Pose>(
+                setAbsolutePoseTopic, msg =>
+                {
+                    Vector3 position = ROS2Utility.RosToUnityPosition(msg.Position);
+                    Quaternion rotation = ROS2Utility.RosToUnityRotation(msg.Orientation);
+                    // Vector3 position = new Vector3((float)(OFFSET_X - msg.Position.X), 0.0f, (float)(OFFSET_Z - msg.Position.Y));
+                    // float orientation_angle = Mathf.Atan2((float)msg.Orientation.Z, (float)msg.Orientation.W) * 2.0f;
+                    // Quaternion rotation = Quaternion.EulerAngles(0, orientation_angle + Mathf.PI, 0);
+                    Debug.Log("setAbsolutePose position:" + position + " rotation:" + rotation);
+                    vehicle.TeleportRigidbody(position, rotation);
+                });
 
         }
 
