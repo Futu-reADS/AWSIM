@@ -19,7 +19,7 @@ public class ObjectSpawner : MonoBehaviour
     private float maxSpeed; // The maximum speed of the object that will be spawned
     private const float maxDragDistance = 100f; // Maximum distance the mouse can be dragged in pixels
     private const float maxIndicatorSize = 2f; // Maximum size scaling of the direction indicator
-    private KeyCode[] keysToCheck = {KeyCode.H, KeyCode.V, KeyCode.O, KeyCode.Z}; // The array for pressable keys
+    private KeyCode[] keysToCheck = {KeyCode.H, KeyCode.V, KeyCode.O, KeyCode.Z, KeyCode.P, KeyCode.L}; // The array for pressable keys
     private KeyCode buttonKey; // The key that was pressed
     private bool isKeyPressed = false; // Flag to check if a key is being pressed
     private bool testObstacle = false;
@@ -27,6 +27,7 @@ public class ObjectSpawner : MonoBehaviour
     private float destroyTime = 10f;
     private float spawnRange = 3.0f; // Spawn point distance from the vehicle
     private float halfLaneWidth = 1.5f; // Most common width of the lanes
+    public bool longDestroyTime = false;  // 
     void Update()
     {
         // If no key is currently being pressed and any key is pressed down
@@ -37,23 +38,28 @@ public class ObjectSpawner : MonoBehaviour
             {
                 case KeyCode.H:
                     testObstacle = false; // Set testObstacle flag
-                    destroyTime = 10f; // Set destroy time to 10 sec
+                    destroyTime = (longDestroyTime ? 300f : 10f); // Set destroy time to 10 sec
                     HandleKeyPress(0, keyPressed); // Handle the H key press
                     break;
                 case KeyCode.V:
                     testObstacle = false; // Set testObstacle flag
-                    destroyTime = 10f; // Set destroy time to 10 sec
+                    destroyTime = (longDestroyTime ? 300f : 10f); // Set destroy time to 10 sec
                     HandleKeyPress(1, keyPressed); // Handle the V key press
                     break;
                 case KeyCode.O:
                     testObstacle = true; // Set testObstacle flag
-                    destroyTime = 60f; // Set destroy time to 1 min
+                    destroyTime = (longDestroyTime ? 300f : 60f); // Set destroy time to 10 sec
                     HandleKeyPress(2, keyPressed); // Handle the O key press
                     break;
                 case KeyCode.Z:
                     testObstacle = false; // Set testObstacle flag
-                    destroyTime = 20f; // Set destroy time to 1 min
+                    destroyTime = (longDestroyTime ? 300f : 20f); // Set destroy time to 10 sec
                     HandleKeyPress(0, keyPressed); // Handle the O key press
+                    break;
+                case KeyCode.P:
+                    testObstacle = false; // Set testObstacle flag
+                    destroyTime = (longDestroyTime ? 300f : 60f); // Set destroy time to 10 sec
+                    HandleKeyPress(2, keyPressed); // Handle the O key press
                     break;
                 // Add more cases here as needed
             }

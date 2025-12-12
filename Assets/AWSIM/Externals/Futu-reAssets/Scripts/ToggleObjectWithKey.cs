@@ -8,6 +8,8 @@ public class ToggleObjectWithKey : MonoBehaviour
     private Text statusText;
     private Coroutine statusCoroutine;
 
+    public ObjectSpawner objectSpawner;
+
     void Start()
     {
         // Check if statusText is assigned, if not, create it
@@ -40,6 +42,18 @@ public class ToggleObjectWithKey : MonoBehaviour
 
             // Start a new coroutine
             statusCoroutine = StartCoroutine(ShowStatus(isActive ? "Scenario Enabled" : "Scenario Disabled"));
+        }
+        else if (Input.GetKeyDown(KeyCode.L))
+        {
+            objectSpawner.longDestroyTime = !objectSpawner.longDestroyTime;
+            // Stop the previous coroutine if it's running
+            if (statusCoroutine != null)
+            {
+                StopCoroutine(statusCoroutine);
+            }
+
+            // Start a new coroutine
+            statusCoroutine = StartCoroutine(ShowStatus(objectSpawner.longDestroyTime? "Object destroy time set to 5min (long)" : "Object destroy time set to default"));
         }
     }
 
