@@ -19,7 +19,7 @@ public class ObjectSpawner : MonoBehaviour
     private float maxSpeed; // The maximum speed of the object that will be spawned
     private const float maxDragDistance = 100f; // Maximum distance the mouse can be dragged in pixels
     private const float maxIndicatorSize = 2f; // Maximum size scaling of the direction indicator
-    private KeyCode[] keysToCheck = {KeyCode.H, KeyCode.V, KeyCode.O, KeyCode.Z, KeyCode.P, KeyCode.L}; // The array for pressable keys
+    private KeyCode[] keysToCheck = {KeyCode.H, KeyCode.V, KeyCode.O, KeyCode.Z, KeyCode.P, KeyCode.L, KeyCode.C}; // The array for pressable keys
     private KeyCode buttonKey; // The key that was pressed
     private bool isKeyPressed = false; // Flag to check if a key is being pressed
     private bool testObstacle = false;
@@ -28,6 +28,7 @@ public class ObjectSpawner : MonoBehaviour
     private float spawnRange = 3.0f; // Spawn point distance from the vehicle
     private float halfLaneWidth = 1.5f; // Most common width of the lanes
     public bool longDestroyTime = false;  // 
+    private List<GameObject> spawnedObjectList;
     void Update()
     {
         // If no key is currently being pressed and any key is pressed down
@@ -60,6 +61,9 @@ public class ObjectSpawner : MonoBehaviour
                     testObstacle = false; // Set testObstacle flag
                     destroyTime = (longDestroyTime ? 300f : 60f); // Set destroy time to 10 sec
                     HandleKeyPress(2, keyPressed); // Handle the O key press
+                    break;
+                case KeyCode.C:
+                    ClearSpawnedObject();
                     break;
                 // Add more cases here as needed
             }
@@ -131,6 +135,7 @@ public class ObjectSpawner : MonoBehaviour
             }
                 // Instantiate the object at the random point
                 spawnedObject = Instantiate(objectToSpawn, randomSpawnPoint, Quaternion.identity);
+                UpdateSpawnedObjectList(spawnedObject);
                 Destroy(spawnedObject, destroyTime); // Destroy the object after 10 seconds
                 Rigidbody rb = spawnedObject.GetComponent<Rigidbody>(); // Get the Rigidbody component of the spawned object
                 if (rb != null && !testObstacle)
@@ -152,8 +157,10 @@ public class ObjectSpawner : MonoBehaviour
             {
                 // Instantiate the object at the hit point
                 spawnedObject = Instantiate(objectToSpawn, hit.point, Quaternion.identity); 
+                Debug.Log("instantiated an object at " + hit.point);
                 Vector3 cameraRotation = Camera.main.transform.eulerAngles;
                 spawnedObject.transform.rotation = Quaternion.Euler(0, cameraRotation.y, 0); // Set the spawned object rotation towards the main camera
+                UpdateSpawnedObjectList(spawnedObject);
                 Destroy(spawnedObject, destroyTime); // Destroy the object after 10 seconds
                 initialMousePosition = Input.mousePosition; // Store the initial mouse position
                 initialRayHitPosition = hit.point; // Store the initial hit point
@@ -255,6 +262,31 @@ public class ObjectSpawner : MonoBehaviour
                 scaleVect.y = initialScaleY * scale;
                 spawnedObject.transform.localScale = scaleVect;
             }
+        }
+    }
+
+    void UpdateSpawnedObjectList(GameObject goToAdd)
+    {
+        for (int i=spawnedObjectList.Count-1; i>=0; i--) {
+            GameObject so;
+            so = spawnedObjectList[i];
+            if (!so) {
+                spawnedObjectList.Remove(so);
+            }
+        }
+        spawnedObjectList.Add(goToAdd);
+    }
+    void ClearSpawnedObject()
+    {
+        for (int i=spawnedObjectList.Count-1; i>=0; i--) {
+            GameObject so;
+            so = spawnedObjectList[i];
+            if (!so) {
+                spawnedObjectList.Remove(so);
+            }
+        }
+        for (int i=spawnedObjectList.Count-1; i>=0; i--) {
+            Destroy(spawnedObjectList[i]);
         }
     }
 }

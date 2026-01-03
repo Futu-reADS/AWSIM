@@ -32,7 +32,7 @@ public class SpawnInstructions : MonoBehaviour
                             "Press 'H' to spawn human (10s), 'V' for vehicle (10s)\n" +
                             "Press 'O' for object (height determined by mouse dragging) (60s)\n" +
                             "Press 'P' for 1[m]-tall object (60s)\n" +
-                            "Press 'Z' to spawn human swarming around ego vehicle (20s)" +
+                            "Press 'Z' to spawn human swarming around ego vehicle (20s)\n" +
                             "Press 'E' to disable/enable scenario\n" +
                             "Press 'L' to enable/disable longer(5min) destroy time";
         instructionText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
