@@ -33,6 +33,19 @@ public class BollardSpawner : MonoBehaviour
     public Slider sliderForPitch;
     public Slider sliderForOffset;
 
+    public GameObject originalBollard1;
+    public GameObject originalBollard2;
+    public GameObject originalBollard3;
+    public GameObject originalBollard4;
+    public GameObject originalBollard5;
+    public GameObject originalBollard6;
+    public GameObject originalBollard7;
+    public GameObject originalBollard8;
+    public GameObject originalBollard9;
+    public GameObject originalBollard10;
+    public GameObject originalBollard11;
+    public GameObject originalBollard12;
+
     private class BollardLinePrivate
     {
         private GameObject bollardObject;
@@ -76,11 +89,21 @@ public class BollardSpawner : MonoBehaviour
                 }
                 Vector3 position = bollardLine.start + distance * dir;
                 bollards[i] = Instantiate(bollardObject, position, Quaternion.identity);
+                //bollards[i].transform.localScale = new Vector3(1.25f, 1.0f, 1.25f);      // bolder objects are used with this scale (50cm -> 62.5cm)
+                bollards[i].SetActive(true);
                 //Debug.Log("i:" + i + " instantiated a bollardObject at " + position);
             }
         }
-    };
-
+        public void SetActive(bool _active)
+        {
+            for (int i = 0; i < numOfBollardsMax; i++)
+            {
+                if (bollards[i]) {
+                    bollards[i].SetActive(_active);
+                }
+            }
+        }
+    }
     public enum BollardLineIndex
     {
         IntersectionEast,
@@ -89,9 +112,11 @@ public class BollardSpawner : MonoBehaviour
         CourtyardNorth,
         NumOfElements
     };
+
+    private bool customizeBollard = false;
     private BollardLine[] bollardLines;
     private BollardLinePrivate[] bollardLinesPrivate;
-    bool isOffsetOrPitchModified = true;
+    bool isModified = true;
     float offset = 0.0f; // [m]
     float pitch = 2.0f; // [m]
 
@@ -137,16 +162,35 @@ public class BollardSpawner : MonoBehaviour
             return;
         }
 
-        if (!isOffsetOrPitchModified)
+        if (!isModified)
         {
             return;
         }
-        Debug.Log("Offset or pitch is modified. Modify bollard positions..");
-        for (uint i = 0; i < (uint)BollardLineIndex.NumOfElements; i++)
-        {
-            bollardLinesPrivate[i].SetOffsetAndPitch(offset, pitch);
+        originalBollard1.SetActive(!customizeBollard);
+        originalBollard2.SetActive(!customizeBollard);
+        originalBollard3.SetActive(!customizeBollard);
+        originalBollard4.SetActive(!customizeBollard);
+        originalBollard5.SetActive(!customizeBollard);
+        originalBollard6.SetActive(!customizeBollard);
+        originalBollard7.SetActive(!customizeBollard);
+        originalBollard8.SetActive(!customizeBollard);
+        originalBollard9.SetActive(!customizeBollard);
+        originalBollard10.SetActive(!customizeBollard);
+        originalBollard11.SetActive(!customizeBollard);
+        originalBollard12.SetActive(!customizeBollard);
+        if (customizeBollard) {
+            Debug.Log("Offset or pitch is modified. Modify bollard positions..");
+            for (uint i = 0; i < (uint)BollardLineIndex.NumOfElements; i++)
+            {
+                bollardLinesPrivate[i].SetOffsetAndPitch(offset, pitch);
+            }
+        } else {
+            for (uint i=0; i < (uint)BollardLineIndex.NumOfElements; i++)
+            {
+                bollardLinesPrivate[i].SetActive(false);
+            }
         }
-        isOffsetOrPitchModified = false;
+        isModified = false;
         Debug.Log("Modified.");
     }
 
@@ -155,7 +199,7 @@ public class BollardSpawner : MonoBehaviour
         Debug.Log("_pitch:" + _pitch);
         if (pitch != _pitch)
         {
-            isOffsetOrPitchModified = true;
+            isModified = true;
             pitch = _pitch;
             inputFieldForPitchValue.text = pitch.ToString();
         }
@@ -166,7 +210,7 @@ public class BollardSpawner : MonoBehaviour
         Debug.Log("_offset:" + _offset);
         if (offset != _offset)
         {
-            isOffsetOrPitchModified = true;
+            isModified = true;
             offset = _offset;
             inputFieldForOffsetValue.text = offset.ToString();
         }
@@ -176,7 +220,7 @@ public class BollardSpawner : MonoBehaviour
     {
         float newPitch = Mathf.Clamp(float.Parse(_pitchString), 1.0f, 10.0f);
         if (newPitch != pitch) {
-            isOffsetOrPitchModified = true;
+            isModified = true;
             pitch = newPitch;
             sliderForPitch.value = pitch;
         }
@@ -186,9 +230,17 @@ public class BollardSpawner : MonoBehaviour
     {
         float newOffset = Mathf.Clamp(float.Parse(_offsetString), -5.0f, 5.0f);
         if (newOffset != offset) {
-            isOffsetOrPitchModified = true;
+            isModified = true;
             offset = newOffset;
             sliderForOffset.value = offset;
+        }
+    }
+
+    public void OnChangeLayoutCustomize(bool _customize)
+    {
+        if (customizeBollard != _customize) {
+            isModified = true;
+            customizeBollard = _customize;
         }
     }
 }
