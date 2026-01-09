@@ -9,9 +9,15 @@ EditorBuildSettings:
     path: Assets/AWSIM/Scenes/Main/AutowareSimulation.unity
     guid: 9a19a6429a390f1428320cff9d4e1f10
   - enabled: 0
-    path: Assets/AWSIM/Externals/Futu-reAssets/Scenes/Main/FacilitySimulationOrg.unity
-    guid: 5602939f8b365433ebf9490dfbebfc0a
-  - enabled: 1
+    path: 
+    guid: 00000000000000000000000000000000
+  - enabled: 0
     path: Assets/AWSIM/Externals/Futu-reAssets/Scenes/Main/FacilitySimulation.unity
     guid: a1134f03315d55a109718be17017c3ef
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
+  - enabled: 1
+    path: Assets/AWSIM/Externals/Futu-reAssets/Scenes/Main/FacilitySimulation_bld0.1.unity
+    guid: 412e74fcd7139932284db2dc07b31b2b
   m_configObjects: {}
