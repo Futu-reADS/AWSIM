@@ -20,7 +20,10 @@ EditorBuildSettings:
   - enabled: 0
     path: 
     guid: 00000000000000000000000000000000
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 1
     path: Assets/AWSIM/Externals/Futu-reAssets/Scenes/Main/Binhai_from_pcd.unity
-    guid: 25b7a7dfda2875e0187d860318e0f4b9
+    guid: db6e9b86315c809efabc237f86dc127f
   m_configObjects: {}
