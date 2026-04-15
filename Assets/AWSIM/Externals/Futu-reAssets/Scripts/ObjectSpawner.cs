@@ -29,6 +29,11 @@ public class ObjectSpawner : MonoBehaviour
     private float halfLaneWidth = 1.5f; // Most common width of the lanes
     public bool longDestroyTime = false;  // 
     private List<GameObject> spawnedObjectList;
+
+    void Awake()
+    {
+        spawnedObjectList = new List<GameObject>();
+    }
     void Update()
     {
         // If no key is currently being pressed and any key is pressed down
